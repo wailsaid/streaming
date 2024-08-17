@@ -1,6 +1,7 @@
 package controles
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -9,11 +10,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/saidwail/learningGo/initEnv"
-	"github.com/saidwail/learningGo/models"
+	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/models"
 )
 
-func AddUser(c *gin.Context) {
+func SignUp(c *gin.Context) {
+	log.Println(c.Params)
+
 	var user models.User
 	if c.Bind(&user) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -21,6 +24,9 @@ func AddUser(c *gin.Context) {
 		})
 		return
 	}
+	/* log.Println(user.Email)
+	log.Println(user.User)
+	log.Println(user.Password) */
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
@@ -40,7 +46,7 @@ func AddUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{})
+	c.Redirect(302, "/login")
 }
 
 func ListUsers(c *gin.Context) {
@@ -116,5 +122,5 @@ func Login(c *gin.Context) {
 		true,
 		true,
 	)
-	c.JSON(200, gin.H{})
+	c.Redirect(302, "/")
 }

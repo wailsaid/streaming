@@ -2,22 +2,33 @@ package midelware
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/saidwail/learningGo/initEnv"
-	"github.com/saidwail/learningGo/models"
+	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/models"
 )
 
 func JwtFilter(c *gin.Context) {
+	/* if c.Request.URL.Path == "/" {
+		c.Next()
+		return
+
+	} */
+	unauthorized := false
+
 	stringToken, err := c.Cookie("Authorization")
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
+		unauthorized = true
+		//c.AbortWithStatus(http.StatusUnauthorized)
+		//return
+		if c.Request.URL.Path == "/" {
+			c.Next()
+			return
+		}
 	}
 
 	token, err := jwt.Parse(stringToken, func(t *jwt.Token) (interface{}, error) {
@@ -27,8 +38,9 @@ func JwtFilter(c *gin.Context) {
 		return []byte(os.Getenv("TOKEN_SECRET")), nil
 	})
 	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
+		unauthorized = true
+		//c.AbortWithStatus(http.StatusUnauthorized)
+		//return
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -38,21 +50,26 @@ func JwtFilter(c *gin.Context) {
 		res := initEnv.DB.First(&user, "email = ?", claims["sub"])
 
 		if res.Error != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{})
-			return
+			unauthorized = true
+			//c.JSON(http.StatusUnauthorized, gin.H{})
+			//return
 		}
 		if user.ID == 0 {
-			c.JSON(http.StatusUnauthorized, gin.H{})
-			return
+			unauthorized = true
+			//c.JSON(http.StatusUnauthorized, gin.H{})
+			//return
 		}
 
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			c.JSON(http.StatusUnauthorized, gin.H{})
+			unauthorized = true
+			//c.JSON(http.StatusUnauthorized, gin.H{})
 		}
-
+		c.Set("logged_in", true)
 		c.Next()
 		return
 	}
-
-	c.AbortWithStatus(http.StatusUnauthorized)
+	if unauthorized {
+		c.Redirect(302, "/login")
+	}
+	//c.AbortWithStatus(http.StatusUnauthorized)
 }

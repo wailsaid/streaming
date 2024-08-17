@@ -2,9 +2,8 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/saidwail/learningGo/controles"
-	"github.com/saidwail/learningGo/initEnv"
-	"github.com/saidwail/learningGo/midelware"
+	"github.com/saidwail/streaming/controles"
+	"github.com/saidwail/streaming/initEnv"
 )
 
 func main() {
@@ -13,25 +12,35 @@ func main() {
 
 	server := gin.Default()
 
-	server.Static("/assets", "./templ/assets")
+	server.Static("./assets", "./templ/assets")
 	server.LoadHTMLGlob("templ/*.html")
 
-	server.GET("/", midelware.JwtFilter, func(c *gin.Context) {
-		c.HTML(200, "index", gin.H{
-			"name": "<h1>said</h1>",
+	server.GET("/", func(c *gin.Context) {
+		_, LogedIn := c.Get("logged_in")
+		c.HTML(200, "index.html", gin.H{
+			//"name":    "said",
+			"LogedIn": LogedIn,
 		})
 	})
+
+	server.GET("signup", func(c *gin.Context) {
+		c.HTML(200, "signup.html", nil)
+	})
+	server.POST("/signup", controles.SignUp)
 
 	server.GET("/login", func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
-	server.GET("signup", func(c *gin.Context) {
-		c.HTML(200, "signup.html", nil)
-	})
-
-	server.POST("/signup", controles.AddUser)
-
 	server.POST("/login", controles.Login)
+
+	server.GET("/upload", func(c *gin.Context) {
+		_, LogedIn := c.Get("logged_in")
+		c.HTML(200, "upload.html", gin.H{
+			//"name":    "said",
+			"LogedIn": LogedIn,
+		})
+	})
+	server.POST("/upload")
 
 	server.GET("/list_users", controles.ListUsers)
 

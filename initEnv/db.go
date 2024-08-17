@@ -7,7 +7,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
-	"github.com/saidwail/learningGo/models"
+	"github.com/saidwail/streaming/models"
 )
 
 var DB *gorm.DB

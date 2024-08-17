@@ -1,6 +1,6 @@
-module github.com/saidwail/learningGo
+module github.com/saidwail/streaming
 
-go 1.21.1
+go 1.22.5
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -8,10 +8,7 @@ require (
 	gorm.io/gorm v1.25.7
 )
 
-require (
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
-	github.com/mattn/go-sqlite3 v1.14.17 // indirect
-)
+require github.com/mattn/go-sqlite3 v1.14.17 // indirect
 
 require (
 	github.com/bytedance/sonic v1.10.2 // indirect
