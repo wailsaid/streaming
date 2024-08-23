@@ -1,4 +1,4 @@
-package initEnv
+package database
 
 import (
 	"fmt"

@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
 )
 
@@ -37,7 +37,7 @@ func SignUp(c *gin.Context) {
 	}
 	user.Password = string(hash)
 
-	res := initEnv.DB.Create(&user)
+	res := database.DB.Create(&user)
 
 	if res.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -51,7 +51,7 @@ func SignUp(c *gin.Context) {
 
 func ListUsers(c *gin.Context) {
 	var ListUsers []models.User
-	res := initEnv.DB.Find(&ListUsers)
+	res := database.DB.Find(&ListUsers)
 	if res.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "could not retreve users",
@@ -76,7 +76,7 @@ func Login(c *gin.Context) {
 
 	// c.JSON()
 	var user models.User
-	res := initEnv.DB.First(&user, "email = ?", reqBody.Email)
+	res := database.DB.First(&user, "email = ?", reqBody.Email)
 
 	if res.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
 )
 
@@ -35,7 +35,7 @@ func JwtFilter(c *gin.Context) {
 		fmt.Println(claims["sub"])
 		var user models.User
 
-		res := initEnv.DB.First(&user, "email = ?", claims["sub"])
+		res := database.DB.First(&user, "email = ?", claims["sub"])
 
 		if res.Error != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{})

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
 )
 
@@ -35,7 +35,7 @@ func UploadVideo(c *gin.Context) {
 		Path:  path,
 	}
 
-	res := initEnv.DB.Create(u)
+	res := database.DB.Create(u)
 	if res.Error != nil {
 		log.Println(res.Error.Error())
 	}
@@ -50,7 +50,7 @@ func UploadVideo(c *gin.Context) {
 
 func ListVideos(c *gin.Context) {
 	var list []models.Video
-	res := initEnv.DB.Find(&list)
+	res := database.DB.Find(&list)
 	if res.Error != nil {
 		log.Fatal(res.Error)
 	}
