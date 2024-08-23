@@ -23,6 +23,7 @@ func UploadPage(c *gin.Context) {
 }
 
 func UploadVideo(c *gin.Context) {
+	title := c.PostForm("title")
 	videoFile, err := c.FormFile("video")
 	if err != nil {
 		c.Redirect(http.StatusFound, "/upload?s=err")
@@ -30,11 +31,14 @@ func UploadVideo(c *gin.Context) {
 	}
 	path := "./Videos/" + videoFile.Filename
 	u := &models.Video{
-		Title: c.Query("title"),
+		Title: title,
 		Path:  path,
 	}
 
-	initEnv.DB.Create(u)
+	res := initEnv.DB.Create(u)
+	if res.Error != nil {
+		log.Println(res.Error.Error())
+	}
 
 	if err := c.SaveUploadedFile(videoFile, path); err != nil {
 		c.Redirect(http.StatusFound, "/upload?s=err")
@@ -45,7 +49,7 @@ func UploadVideo(c *gin.Context) {
 }
 
 func ListVideos(c *gin.Context) {
-	var list models.Video
+	var list []models.Video
 	res := initEnv.DB.Find(&list)
 	if res.Error != nil {
 		log.Fatal(res.Error)
