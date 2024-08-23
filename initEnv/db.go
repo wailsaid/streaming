@@ -24,5 +24,9 @@ func Connect() {
 	if err != nil {
 		log.Fatal("DB: could not create a user table")
 	}
+	err = DB.AutoMigrate(&models.Video{})
+	if err != nil {
+		log.Fatal("DB: could not create a video table")
+	}
 	fmt.Println("DB: Done ok")
 }

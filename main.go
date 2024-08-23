@@ -14,13 +14,10 @@ func main() {
 
 	server.Static("./assets", "./templ/assets")
 	server.LoadHTMLGlob("templ/*.html")
+	server.MaxMultipartMemory = 100 << 20
 
 	server.GET("/", func(c *gin.Context) {
-		_, LogedIn := c.Get("logged_in")
-		c.HTML(200, "index.html", gin.H{
-			//"name":    "said",
-			"LogedIn": LogedIn,
-		})
+		c.HTML(200, "index.html", gin.H{})
 	})
 
 	server.GET("signup", func(c *gin.Context) {
@@ -33,16 +30,12 @@ func main() {
 	})
 	server.POST("/login", controles.Login)
 
-	server.GET("/upload", func(c *gin.Context) {
-		_, LogedIn := c.Get("logged_in")
-		c.HTML(200, "upload.html", gin.H{
-			//"name":    "said",
-			"LogedIn": LogedIn,
-		})
-	})
-	server.POST("/upload")
+	server.GET("/upload", controles.UploadPage)
 
-	server.GET("/list_users", controles.ListUsers)
+	server.POST("/upload", controles.UploadVideo)
+
+	server.GET("/video-list", controles.ListVideos)
+	//server.GET("/list_users", controles.ListUsers)
 
 	server.Run()
 }

@@ -2,6 +2,7 @@ package midelware
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -13,22 +14,10 @@ import (
 )
 
 func JwtFilter(c *gin.Context) {
-	/* if c.Request.URL.Path == "/" {
-		c.Next()
-		return
-
-	} */
-	unauthorized := false
-
 	stringToken, err := c.Cookie("Authorization")
 	if err != nil {
-		unauthorized = true
-		//c.AbortWithStatus(http.StatusUnauthorized)
-		//return
-		if c.Request.URL.Path == "/" {
-			c.Next()
-			return
-		}
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	token, err := jwt.Parse(stringToken, func(t *jwt.Token) (interface{}, error) {
@@ -38,9 +27,8 @@ func JwtFilter(c *gin.Context) {
 		return []byte(os.Getenv("TOKEN_SECRET")), nil
 	})
 	if err != nil {
-		unauthorized = true
-		//c.AbortWithStatus(http.StatusUnauthorized)
-		//return
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -50,26 +38,21 @@ func JwtFilter(c *gin.Context) {
 		res := initEnv.DB.First(&user, "email = ?", claims["sub"])
 
 		if res.Error != nil {
-			unauthorized = true
-			//c.JSON(http.StatusUnauthorized, gin.H{})
-			//return
+			c.JSON(http.StatusUnauthorized, gin.H{})
+			return
 		}
 		if user.ID == 0 {
-			unauthorized = true
-			//c.JSON(http.StatusUnauthorized, gin.H{})
-			//return
+			c.JSON(http.StatusUnauthorized, gin.H{})
+			return
 		}
 
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
-			unauthorized = true
-			//c.JSON(http.StatusUnauthorized, gin.H{})
+			c.JSON(http.StatusUnauthorized, gin.H{})
 		}
-		c.Set("logged_in", true)
+
 		c.Next()
 		return
 	}
-	if unauthorized {
-		c.Redirect(302, "/login")
-	}
-	//c.AbortWithStatus(http.StatusUnauthorized)
+
+	c.AbortWithStatus(http.StatusUnauthorized)
 }
