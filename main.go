@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/models"
 )
 
 func main() {
@@ -17,7 +18,12 @@ func main() {
 	server.MaxMultipartMemory = 100 << 20
 
 	server.GET("/", func(c *gin.Context) {
-		c.HTML(200, "index.html", gin.H{})
+		var videos []models.Video
+		initEnv.DB.Find(&videos)
+
+		c.HTML(200, "index.html", gin.H{
+			"videos": videos,
+		})
 	})
 
 	server.GET("signup", func(c *gin.Context) {

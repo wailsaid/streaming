@@ -1,0 +1,16 @@
+{{block "vlink" .}}
+<a class="relative group" href="#">
+    <img src="./assets/placeholder.svg" alt="Thumbnail" width="320" height="180"
+        class="rounded-lg aspect-video object-cover group-hover:opacity-50 transition-opacity" />
+    <div
+        class="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/50 to-transparent rounded-lg">
+        <h3 class="text-lg font-semibold text-white line-clamp-2">{{.Title}}</h3>
+        <div class="flex items-center gap-2 mt-2">
+            <span class="relative flex shrink-0 overflow-hidden rounded-full w-6 h-6 border">
+                <img class="aspect-square h-full w-full" alt="@shadcn" src="./assets/placeholder-user.jpeg" />
+            </span>
+            <div class="text-sm text-white line-clamp-1">FromSoftware</div>
+        </div>
+    </div>
+</a>
+{{end}}

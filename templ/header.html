@@ -1,0 +1,46 @@
+{{block "header" . }}
+<header class="bg-background border-b px-4 lg:px-6 h-14 flex items-center">
+    <a class="flex items-center justify-center gap-2" href="#">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="w-8 h-8 text-blue-800">
+            <path
+                d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17">
+            </path>
+            <path d="m10 15 5-3-5-3z"></path>
+        </svg>
+        <span class="font-semibold">YouClone</span>
+    </a>
+    <div class="flex-1 ml-6 max-w-md">
+        <form class="flex items-center rounded-full bg-muted px-3 py-1">
+            <input
+                class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent flex-1 outline-none"
+                placeholder="Search" type="search" />
+            <button
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 text-muted-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="w-5 h-5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+            </button>
+        </form>
+    </div>
+
+    {{if .LogedIn}}
+    <span class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 border ml-auto">
+        <img class="aspect-square h-full w-full" alt="@shadcn" src="./assets/placeholder-user.jpeg" />
+    </span>
+    {{else}}
+    <div class="ml-auto ">
+
+        <a href="/login" class="border-2 border-blue-800 px-3 py-2 text-blue-800 rounded-md mx-1"> Sign in </a>
+        <a href="/signup" class="bg-blue-800 px-3 py-2 rounded-md text-white mx-1 hover:bg-blue-900"> Sign up </a>
+    </div>
+    {{end}}
+
+
+</header>
+
+{{end}}
