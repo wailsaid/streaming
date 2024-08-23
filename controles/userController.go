@@ -24,9 +24,6 @@ func SignUp(c *gin.Context) {
 		})
 		return
 	}
-	/* log.Println(user.Email)
-	log.Println(user.User)
-	log.Println(user.Password) */
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {

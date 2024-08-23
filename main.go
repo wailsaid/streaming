@@ -4,14 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/database"
-	"github.com/saidwail/streaming/initEnv"
+	"github.com/saidwail/streaming/env"
 	"github.com/saidwail/streaming/models"
 )
 
 func main() {
-	initEnv.Init()
-	database.Connect()
 
+	env.Init()
+	database.Connect()
 	server := gin.Default()
 
 	server.ForwardedByClientIP = true
