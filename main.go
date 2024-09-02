@@ -20,6 +20,7 @@ func main() {
 	server.SetTrustedProxies([]string{"127.0.0.1"})
 
 	server.Static("./assets", "./templ/assets")
+
 	server.LoadHTMLGlob("templ/*.html")
 	server.MaxMultipartMemory = 100 << 20
 

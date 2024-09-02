@@ -22,6 +22,7 @@ type Channel struct {
 
 type Video struct {
 	gorm.Model
-	Title string `form:"title" json:"title"`
-	Path  string `form:"path" json:"path"`
+	Title         string `form:"title" json:"title"`
+	VideoPath     string `form:"video" json:"video"`
+	ThumbnailPath string `form:"thumbnail" json:"thumbnail"`
 }

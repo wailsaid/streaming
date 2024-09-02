@@ -1,13 +1,13 @@
 package controles
 
 import (
+	"encoding/base64"
 	"log"
 	"net/http"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/database"
-	"github.com/saidwail/streaming/env"
 	"github.com/saidwail/streaming/models"
 )
 
@@ -31,23 +31,33 @@ func UploadVideo(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/upload?s=err")
 		return
 	}
-	videoPath := filepath.Join("uploads", videoFile.Filename)
+
+	thumbnail, err := c.FormFile("thumbnail")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/upload?s=err")
+		return
+	}
+	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
+
+	videoPath := filepath.Join("uploads", videocodex)
+	thumbnailPath := filepath.Join("assets", thumbnail.Filename)
+
 	u := &models.Video{
-		Title: title,
-		Path:  videoPath,
+		Title:         title,
+		VideoPath:     videoPath,
+		ThumbnailPath: thumbnailPath,
 	}
 
 	res := database.DB.Create(u)
 	if res.Error != nil {
-		log.Println(res.Error.Error())
+		log.Fatal(res.Error.Error())
 	}
 
 	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
 		c.Redirect(http.StatusFound, "/upload?s=err")
 		return
 	}
-	thumbnailPath := filepath.Join("thumbnails", videoFile.Filename+".png")
-	if err := env.GenerateThumbnail(videoPath, thumbnailPath); err != nil {
+	if err := c.SaveUploadedFile(thumbnail, thumbnailPath); err != nil {
 		c.Redirect(http.StatusFound, "/upload?s=err")
 		return
 	}
