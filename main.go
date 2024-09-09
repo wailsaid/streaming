@@ -14,6 +14,7 @@ func main() {
 
 	env.Init()
 	database.Connect()
+
 	server := gin.Default()
 
 	server.ForwardedByClientIP = true

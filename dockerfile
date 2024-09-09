@@ -18,7 +18,8 @@ WORKDIR /app
 
 # Copy the built Go binary from the builder stage
 COPY --from=builder /app/main .
-COPY .env .env
+COPY --from=builder /app/templ /app/templ
+
 # Expose the port the app runs on
 EXPOSE 8080
 

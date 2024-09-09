@@ -9,17 +9,11 @@ import (
 	"github.com/saidwail/streaming/database"
 )
 
-var (
-	VideosPath     string
-	ThumbnailsPath string
-)
-
 func Init() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("could not load .env file")
-		log.Fatal(err.Error())
+		log.Println(err.Error())
 	}
 
 	if mode := os.Getenv("GIN_MODE"); mode == "release" {
