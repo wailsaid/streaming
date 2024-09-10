@@ -71,3 +71,17 @@ func Init() {
 	}
 
 }
+
+func GetAllVideos() []models.Video {
+	if DB == nil {
+		log.Println("DB is not initialized")
+		return nil
+	}
+	log.Println("DB is initialized")
+
+	var videos []models.Video
+
+	DB.Find(&videos)
+
+	return videos
+}

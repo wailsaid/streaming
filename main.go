@@ -26,8 +26,7 @@ func main() {
 	server.MaxMultipartMemory = 100 << 20
 
 	server.GET("/", func(c *gin.Context) {
-		var videos []models.Video
-		database.DB.Find(&videos)
+		videos := database.GetAllVideos()
 
 		c.HTML(200, "index.html", gin.H{
 			"videos": videos,
