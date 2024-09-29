@@ -34,9 +34,8 @@ func SignUp(c *gin.Context) {
 	}
 	user.Password = string(hash)
 
-	res := database.DB.Create(&user)
-
-	if res.Error != nil {
+	err = database.CreateUser(&user)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "could not store user",
 		})
@@ -47,11 +46,10 @@ func SignUp(c *gin.Context) {
 }
 
 func ListUsers(c *gin.Context) {
-	var ListUsers []models.User
-	res := database.DB.Find(&ListUsers)
-	if res.Error != nil {
+	ListUsers, err := database.FindAllUsers()
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "could not retreve users",
+			"error": "could not retrieve users",
 		})
 		return
 	}
@@ -71,8 +69,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	user, err := database.FindUserByEmail(reqBody.Email)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "incorrect email or password",
+		})
+		return
+	}
+
 	// c.JSON()
-	var user models.User
+
 	res := database.DB.First(&user, "email = ?", reqBody.Email)
 
 	if res.Error != nil {
@@ -88,7 +94,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(reqBody.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(reqBody.Password))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "incorrect email or password",

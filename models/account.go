@@ -25,4 +25,5 @@ type Video struct {
 	Title         string `form:"title" json:"title"`
 	VideoPath     string `form:"video" json:"video"`
 	ThumbnailPath string `form:"thumbnail" json:"thumbnail"`
+	Description   string `form:"description" json:"description"`
 }

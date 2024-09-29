@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
+	"github.com/saidwail/streaming/utils"
 )
 
 func UploadPage(c *gin.Context) {
@@ -26,50 +27,108 @@ func UploadPage(c *gin.Context) {
 
 func UploadVideo(c *gin.Context) {
 	title := c.PostForm("title")
+	description := c.PostForm("description")
 	videoFile, err := c.FormFile("video")
 	if err != nil {
-		c.Redirect(http.StatusFound, "/upload?s=err")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not get video file"})
 		return
 	}
 
 	thumbnail, err := c.FormFile("thumbnail")
 	if err != nil {
-		c.Redirect(http.StatusFound, "/upload?s=err")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not get thumbnail file"})
 		return
 	}
-	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
 
+	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
 	videoPath := filepath.Join("uploads", videocodex)
 	thumbnailPath := filepath.Join("assets", thumbnail.Filename)
 
+	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save video file"})
+		return
+	}
+	if err := c.SaveUploadedFile(thumbnail, thumbnailPath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save thumbnail file"})
+		return
+	}
+
+	// Scan video for adult content
+	adultContentTimestamps, err := utils.ScanVideoForAdultContent(videoPath)
+	if err != nil {
+		log.Printf("Error scanning video: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning video"})
+		return
+	}
+
 	u := &models.Video{
 		Title:         title,
+		Description:   description,
 		VideoPath:     videoPath,
 		ThumbnailPath: thumbnailPath,
 	}
 
-	res := database.DB.Create(u)
-	if res.Error != nil {
-		log.Fatal(res.Error.Error())
-	}
-
-	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
-		c.Redirect(http.StatusFound, "/upload?s=err")
-		return
-	}
-	if err := c.SaveUploadedFile(thumbnail, thumbnailPath); err != nil {
-		c.Redirect(http.StatusFound, "/upload?s=err")
+	err = database.CreateVideo(u)
+	if err != nil {
+		log.Printf("Error creating video: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not store video information"})
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/upload?s=ok")
+	c.JSON(http.StatusOK, gin.H{
+		"message":                "Video uploaded successfully",
+		"videoId":                u.ID,
+		"adultContentTimestamps": adultContentTimestamps,
+	})
 }
 
 func ListVideos(c *gin.Context) {
-	var list []models.Video
-	res := database.DB.Find(&list)
-	if res.Error != nil {
-		log.Fatal(res.Error)
+	list, err := database.FindAllVideos()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch videos"})
+		return
 	}
 	c.JSON(http.StatusOK, list)
+}
+
+// New methods to add:
+
+func HomePage(c *gin.Context) {
+	videos, err := database.FindAllVideos()
+	if err != nil {
+		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to fetch videos"})
+		return
+	}
+	c.HTML(200, "index.html", gin.H{
+		"videos": videos,
+	})
+}
+
+func WatchVideo(c *gin.Context) {
+	v := c.Query("v")
+	video, err := database.FindVideoByID(v)
+	if err != nil {
+		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Video not found"})
+		return
+	}
+	c.HTML(http.StatusOK, "watch.html", gin.H{"video": video})
+}
+
+func StreamVideo(c *gin.Context) {
+	v := c.Query("v")
+	c.File(v)
+}
+
+func RemoveAdultContent(c *gin.Context) {
+	videoID := c.Param("id")
+	timestamps := c.PostFormArray("timestamps")
+
+	// Implement logic to remove adult content at specified timestamps
+	err := utils.RemoveAdultContent(videoID, timestamps)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove adult content"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Adult content removed successfully"})
 }
