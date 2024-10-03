@@ -83,22 +83,16 @@ func UploadVideo(c *gin.Context) {
 }
 
 func ListVideos(c *gin.Context) {
-	list, err := database.FindAllVideos()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch videos"})
-		return
-	}
+	list := database.GetAllVideos()
+
 	c.JSON(http.StatusOK, list)
 }
 
 // New methods to add:
 
 func HomePage(c *gin.Context) {
-	videos, err := database.FindAllVideos()
-	if err != nil {
-		c.HTML(http.StatusInternalServerError, "error.html", gin.H{"error": "Failed to fetch videos"})
-		return
-	}
+	videos := database.GetAllVideos()
+
 	c.HTML(200, "index.html", gin.H{
 		"videos": videos,
 	})
