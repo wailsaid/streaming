@@ -22,12 +22,12 @@ func Init() {
 		gin.SetMode(gin.DebugMode)
 
 	}
-	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
-		log.Fatal(err.Error())
-	}
-	if err := os.MkdirAll("thumbnails", os.ModePerm); err != nil {
-		log.Fatal(err.Error())
-	}
+	/* 	if err := os.MkdirAll("uploads", os.ModePerm); err != nil {
+	   		log.Fatal(err.Error())
+	   	}
+	   	if err := os.MkdirAll("thumbnails", os.ModePerm); err != nil {
+	   		log.Fatal(err.Error())
+	   	} */
 
 	database.Init()
 }

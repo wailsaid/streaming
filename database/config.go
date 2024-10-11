@@ -1,56 +1,35 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
 	"github.com/saidwail/streaming/models"
 )
 
-var DB *gorm.DB
-var config struct {
-	db_name string
-	db_host string
-	db_user string
-	db_pwd  string
-	db_port string
-}
-
-func Connect() {
-
-	//var err error
-	dbpath := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		config.db_user, config.db_pwd, config.db_host, config.db_port, config.db_name)
-
-	log.Printf("URL : %s", dbpath)
-
-	DB, err := gorm.Open(mysql.Open(dbpath), &gorm.Config{})
-
-	if err != nil {
-		log.Fatalf("could not connect to a database: %s", err.Error())
+var (
+	DB     *gorm.DB
+	config struct {
+		db_conn string
+		db_name string
+		db_host string
+		db_user string
+		db_pwd  string
+		db_port string
 	}
-
-	err = DB.AutoMigrate(&models.User{})
-	if err != nil {
-		log.Fatal("DB: could not create a user table")
-	}
-	log.Printf("user table done")
-
-	err = DB.AutoMigrate(&models.Video{})
-	if err != nil {
-		log.Fatal("DB: could not create a video table")
-	}
-	log.Printf("user table done")
-
-	fmt.Println("DB: Done ok")
-}
+)
 
 func Init() {
-
+	if config.db_conn = os.Getenv("DB_CONNECT"); config.db_conn == "" {
+		config.db_conn = "sqlite"
+	}
 	if config.db_host = os.Getenv("DB_HOST"); config.db_host == "" {
 		config.db_host = "127.0.1.1"
 	}
@@ -72,48 +51,56 @@ func Init() {
 
 }
 
-func GetAllVideos() []models.Video {
-	if DB == nil {
-		log.Println("DB is not initialized")
-		return nil
+func Connect() {
+
+	db, err := getConnection(config.db_conn)
+	DB = db
+
+	if err != nil {
+		log.Fatalf("could not connect to a database: %s", err.Error())
 	}
-	log.Println("DB is initialized")
 
-	var videos []models.Video
-	DB.Find(&videos)
-	return videos
+	err = DB.AutoMigrate(&models.User{})
+	if err != nil {
+		log.Fatal("DB: could not create a user table")
+	}
+	log.Printf("user table done")
+
+	err = DB.AutoMigrate(&models.Video{})
+	if err != nil {
+		log.Fatal("DB: could not create a video table")
+	}
+	log.Printf("user table done")
+	fmt.Println("DB: Done ok")
 }
 
-// New methods to add:
+func getConnection(connection string) (*gorm.DB, error) {
+	switch connection {
+	case "mysql":
+		return mysqlConnect()
 
-func CreateVideo(video *models.Video) error {
-	return DB.Create(video).Error
+	case "postgres":
+		return postgresConnect()
+
+	case "sqlite":
+		return gorm.Open(sqlite.Open("database.sql"), &gorm.Config{})
+	}
+
+	return nil, errors.New("unsupport db connection")
 }
 
-func FindVideoByID(id string) (models.Video, error) {
-	var video models.Video
-	err := DB.First(&video, id).Error
-	return video, err
+func mysqlConnect() (*gorm.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		config.db_user, config.db_pwd, config.db_host, config.db_port, config.db_name)
+
+	return gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
 }
 
-func FindAllVideos() ([]models.Video, error) {
-	var videos []models.Video
-	err := DB.Find(&videos).Error
-	return videos, err
-}
+func postgresConnect() (*gorm.DB, error) {
 
-func CreateUser(user *models.User) error {
-	return DB.Create(user).Error
-}
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		config.db_host, config.db_user, config.db_pwd, config.db_name, config.db_port)
 
-func FindUserByEmail(email string) (models.User, error) {
-	var user models.User
-	err := DB.First(&user, "email = ?", email).Error
-	return user, err
-}
-
-func FindAllUsers() ([]models.User, error) {
-	var users []models.User
-	err := DB.Find(&users).Error
-	return users, err
+	return gorm.Open(postgres.Open(dsn), &gorm.Config{})
 }

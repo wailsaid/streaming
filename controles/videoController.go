@@ -42,7 +42,7 @@ func UploadVideo(c *gin.Context) {
 
 	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
 	videoPath := filepath.Join("uploads", videocodex)
-	thumbnailPath := filepath.Join("assets", thumbnail.Filename)
+	thumbnailPath := filepath.Join("templ/assets/thumbnails", thumbnail.Filename)
 
 	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save video file"})
@@ -70,7 +70,6 @@ func UploadVideo(c *gin.Context) {
 
 	err = database.CreateVideo(u)
 	if err != nil {
-		log.Printf("Error creating video: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not store video information"})
 		return
 	}

@@ -9,6 +9,8 @@ import (
 
 func main() {
 	env.Init()
+	database.Init()
+
 	database.Connect()
 
 	server := gin.Default()
