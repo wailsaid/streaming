@@ -2,7 +2,6 @@ package controles
 
 import (
 	"encoding/base64"
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -42,7 +41,7 @@ func UploadVideo(c *gin.Context) {
 
 	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
 	videoPath := filepath.Join("uploads", videocodex)
-	thumbnailPath := filepath.Join("templ/assets/thumbnails", thumbnail.Filename)
+	thumbnailPath := filepath.Join("assets/thumbnails", thumbnail.Filename)
 
 	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save video file"})
@@ -54,13 +53,13 @@ func UploadVideo(c *gin.Context) {
 	}
 
 	// Scan video for adult content
-	adultContentTimestamps, err := utils.ScanVideoForAdultContent(videoPath)
-	if err != nil {
-		log.Printf("Error scanning video: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning video"})
-		return
-	}
-
+	/* 	adultContentTimestamps, err := utils.ScanVideoForAdultContent(videoPath)
+	   	if err != nil {
+	   		log.Printf("Error scanning video: %v", err)
+	   		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning video"})
+	   		return
+	   	}
+	*/
 	u := &models.Video{
 		Title:         title,
 		Description:   description,
@@ -70,15 +69,11 @@ func UploadVideo(c *gin.Context) {
 
 	err = database.CreateVideo(u)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not store video information"})
+		c.Redirect(302, "/upload&s=err")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message":                "Video uploaded successfully",
-		"videoId":                u.ID,
-		"adultContentTimestamps": adultContentTimestamps,
-	})
+	c.Redirect(302, "/upload&s=ok")
 }
 
 func ListVideos(c *gin.Context) {

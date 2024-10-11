@@ -24,8 +24,9 @@ services:
       - DB_USER=root
       - DB_PASSWORD=rootpassword
       - DB_NAME=mydb
+      - DB_CONNECT=mysql
       
-      - GIN_MODE=debug
+      - GIN_MODE=release
      
     ports:
       - "8080:8080"
