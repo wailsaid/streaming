@@ -8,24 +8,23 @@
     <title>YouClone</title>
 </head>
 
-<body>
+<body class="bg-gray-100">
     <div class="flex flex-col min-h-dvh">
-
         {{template "header" . }}
 
         <div class="flex flex-1">
             {{template "aside" .}}
-            <main class="flex-1 grid grid-cols-1     sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 xl:grid-cols-4 gap-4 p-4">
-               
-                {{range .videos}}
-                {{template "vlink" .}}
-                {{end}}
-               
-
+            <main class="flex-1 p-4 lg:p-6">
+                <div class="max-w-[2400px] mx-auto">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {{range .videos}}
+                        {{template "vlink" .}}
+                        {{end}}
+                    </div>
+                </div>
             </main>
         </div>
     </div>
-
 </body>
 
 </html>

@@ -1,12 +1,13 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/env"
 	"github.com/saidwail/streaming/utils"
-	"log"
 )
 
 func main() {
@@ -46,6 +47,8 @@ func main() {
 	//server.GET("/list_users", controles.ListUsers)
 
 	server.POST("/remove-adult-content/:id", controles.RemoveAdultContent)
+
+	server.GET("/thumbnail", controles.ServeThumbnail)
 
 	if err := utils.InitMinioClient(); err != nil {
 		log.Fatalf("Failed to initialize MinIO client: %v", err)

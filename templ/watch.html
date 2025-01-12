@@ -5,43 +5,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>YouClone</title>
+    <title>{{.video.Title}} - YouClone</title>
     <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
 </head>
 
-<body>
+<body class="bg-gray-100">
     <div class="flex flex-col min-h-dvh">
-
         {{template "header" . }}
 
-        <div class="flex flex-1">
-            <!-- {{template "aside" .}} -->
-            <main class="grid sm:grid-cols-1 md:grid-cols-3 px-10">
+        <div class="flex flex-1 px-4 lg:px-8 py-6 gap-6">
+            <main class="flex-1 max-w-6xl mx-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Video Section -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-black rounded-lg overflow-hidden shadow-lg">
+                            <video id="player" playsinline controls>
+                                <source src="/stream?v={{.video.VideoPath}}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        
+                        <!-- Video Info -->
+                        <div class="mt-4 bg-white p-4 rounded-lg shadow">
+                            <h1 class="text-xl font-bold mb-2">{{.video.Title}}</h1>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="relative flex shrink-0 overflow-hidden rounded-full w-10 h-10">
+                                        <img class="aspect-square object-cover" alt="Channel Avatar" 
+                                             src="./assets/placeholder-user.jpeg" />
+                                    </span>
+                                    <div>
+                                        <h3 class="font-semibold">Channel Name</h3>
+                                        <p class="text-sm text-gray-500">1.2M subscribers</p>
+                                    </div>
+                                </div>
+                                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-medium">
+                                    Subscribe
+                                </button>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <p class="text-gray-800 whitespace-pre-wrap">{{.video.Description}}</p>
+                            </div>
+                        </div>
+                    </div>
 
-                <section class="col-span-2 w-1/ p-5 bg-ray-500">
-
-                    <video id="player" class="w-1/3 mx-auto" controls>
-                        <source src="/stream?v={{.video.VideoPath}}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </section>
-             <section>
-                    <ol>
-                        <li>Lorem ipsum dolor sit amet consectetur adipisicing elit. Optio, maiores quia? Fugit
-                            reprehenderit, dolore vero esse libero illum obcaecati quas necessitatibus exercitationem
-                            corrupti atque, aut consequatur deserunt adipisci autem molestias.</li>
-                      </li>
-                    </ol>
-                </section>
+                    <!-- Recommendations Section -->
+                    <div class="space-y-4">
+                        <h2 class="font-semibold text-lg mb-4">Recommended Videos</h2>
+                        <!-- Add recommended videos here -->
+                        <div class="bg-white p-4 rounded-lg shadow hover:bg-gray-50 transition-colors">
+                            <div class="aspect-video bg-gray-200 rounded-lg mb-2"></div>
+                            <h3 class="font-medium line-clamp-2">Recommended Video Title</h3>
+                            <p class="text-sm text-gray-500">Channel Name • 100K views</p>
+                        </div>
+                    </div>
+                </div>
             </main>
-
-            <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
-            <script>
-                const player = new Plyr('#player',);
-            </script>
         </div>
     </div>
 
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
+    <script>
+        const player = new Plyr('#player', {
+            controls: [
+                'play-large',
+                'play',
+                'progress',
+                'current-time',
+                'duration',
+                'mute',
+                'volume',
+                'settings',
+                'fullscreen'
+            ]
+        });
+    </script>
 </body>
 
 </html>
