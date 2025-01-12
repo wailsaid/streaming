@@ -70,7 +70,7 @@ func Connect() {
 	if err != nil {
 		log.Fatal("DB: could not create a video table")
 	}
-	log.Printf("user table done")
+	log.Printf("video table done")
 	fmt.Println("DB: Done ok")
 }
 

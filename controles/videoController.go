@@ -1,14 +1,16 @@
 package controles
 
 import (
+	"context"
 	"encoding/base64"
+	"mime/multipart"
 	"net/http"
-	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
 	"github.com/saidwail/streaming/utils"
+	"github.com/minio/minio-go/v7"
 )
 
 func UploadPage(c *gin.Context) {
@@ -22,6 +24,31 @@ func UploadPage(c *gin.Context) {
 	c.HTML(200, "upload.html", gin.H{
 		"msg": msg,
 	})
+}
+
+func uploadFileToMinio(file *multipart.FileHeader, bucket string) (string, error) {
+	ctx := context.Background()
+	minioClient := utils.GetMinioClient()
+
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+
+	objectName := base64.StdEncoding.EncodeToString([]byte(file.Filename))
+	contentType := file.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+
+	_, err = minioClient.PutObject(ctx, bucket, objectName, src, file.Size,
+		minio.PutObjectOptions{ContentType: contentType})
+	if err != nil {
+		return "", err
+	}
+
+	return objectName, nil
 }
 
 func UploadVideo(c *gin.Context) {
@@ -39,27 +66,19 @@ func UploadVideo(c *gin.Context) {
 		return
 	}
 
-	videocodex := base64.StdEncoding.EncodeToString([]byte(videoFile.Filename))
-	videoPath := filepath.Join("uploads", videocodex)
-	thumbnailPath := filepath.Join("assets/thumbnails", thumbnail.Filename)
-
-	if err := c.SaveUploadedFile(videoFile, videoPath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save video file"})
-		return
-	}
-	if err := c.SaveUploadedFile(thumbnail, thumbnailPath); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not save thumbnail file"})
+	// Upload files to MinIO
+	videoPath, err := uploadFileToMinio(videoFile, "videos")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload video file"})
 		return
 	}
 
-	// Scan video for adult content
-	/* 	adultContentTimestamps, err := utils.ScanVideoForAdultContent(videoPath)
-	   	if err != nil {
-	   		log.Printf("Error scanning video: %v", err)
-	   		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning video"})
-	   		return
-	   	}
-	*/
+	thumbnailPath, err := uploadFileToMinio(thumbnail, "thumbnails")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload thumbnail file"})
+		return
+	}
+
 	u := &models.Video{
 		Title:         title,
 		Description:   description,
@@ -69,11 +88,11 @@ func UploadVideo(c *gin.Context) {
 
 	err = database.CreateVideo(u)
 	if err != nil {
-		c.Redirect(302, "/upload&s=err")
+		c.Redirect(302, "/upload?s=err")
 		return
 	}
 
-	c.Redirect(302, "/upload&s=ok")
+	c.Redirect(302, "/upload?s=ok")
 }
 
 func ListVideos(c *gin.Context) {
@@ -104,7 +123,16 @@ func WatchVideo(c *gin.Context) {
 
 func StreamVideo(c *gin.Context) {
 	v := c.Query("v")
-	c.File(v)
+	minioClient := utils.GetMinioClient()
+	
+	object, err := minioClient.GetObject(context.Background(), "videos", v, minio.GetObjectOptions{})
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
+		return
+	}
+	defer object.Close()
+
+	c.DataFromReader(http.StatusOK, -1, "video/mp4", object, nil)
 }
 
 func RemoveAdultContent(c *gin.Context) {

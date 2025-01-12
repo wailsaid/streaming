@@ -24,7 +24,7 @@
                 <div class="px-6 w-full max-w-md mx-auto">
                     <h1 class="text-3xl font-bold mb-6 text-center">Upload Video</h1>
 
-                    <form id="uploadForm" class="space-y-4" enctype="multipart/form-data">
+                    <form id="uploadForm" method="post" action="/upload" class="space-y-4" enctype="multipart/form-data">
                         <div>
                             <label for="title" class="block mb-1 font-medium">
                                 Title <span class="text-red-500">*</span>
@@ -72,8 +72,8 @@
             </main>
         </div>
     </div>
-
-    <!-- <script>
+<!-- 
+    <script>
         document.getElementById('uploadForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -166,7 +166,7 @@
                 window.location.href = '/upload?s=err';
             });
         }
-    </script> -->
+    </script>  -->
 </body>
 
 </html>
