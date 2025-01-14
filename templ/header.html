@@ -1,46 +1,68 @@
-{{block "header" . }}
-<header class="bg-background border-b px-4 lg:px-6 h-14 flex items-center">
-    <a class="flex items-center justify-center gap-2" href="/">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="w-8 h-8 text-blue-800">
-            <path
-                d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17">
-            </path>
-            <path d="m10 15 5-3-5-3z"></path>
-        </svg>
-        <span class="font-semibold">YouClone</span>
-    </a>
-    <div class="flex-1 ml-6 max-w-md">
-        <form class="flex items-center rounded-full bg-muted px-3 py-1">
-            <input
-                class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-transparent flex-1 outline-none"
-                placeholder="Search" type="search" />
-            <button
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 text-muted-foreground">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="w-5 h-5">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
+{{define "header"}}
+<header class="sticky top-0 z-50 w-full border-b bg-white">
+    <div class="flex h-16 items-center px-4 md:px-6">
+        <!-- Left side -->
+        <div class="flex items-center gap-2 lg:gap-4">
+            <button class="lg:hidden p-2 hover:bg-gray-100 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" x2="20" y1="12" y2="12"/>
+                    <line x1="4" x2="20" y1="6" y2="6"/>
+                    <line x1="4" x2="20" y1="18" y2="18"/>
                 </svg>
             </button>
-        </form>
+            <a href="/" class="flex items-center gap-2 font-semibold text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2" class="text-red-600">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/>
+                </svg>
+                YouClone
+            </a>
+        </div>
+
+        <!-- Search bar -->
+        <div class="flex-1 px-4 lg:px-8">
+            <form class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input type="search" placeholder="Search videos..." 
+                        class="w-full h-10 pl-4 pr-12 rounded-full border border-gray-300 focus:outline-none focus:border-blue-500" />
+                    <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.3-4.3"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right side -->
+        <div class="flex items-center gap-4">
+            {{if .User}}
+            <a href="/upload" class="hidden md:flex items-center gap-2 hover:bg-gray-100 px-3 py-2 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                Upload
+            </a>
+            <div class="flex items-center gap-2">
+                <span class="text-sm font-medium">{{.User.Username}}</span>
+                <img src="./assets/placeholder-user.jpeg" alt="Profile" class="w-8 h-8 rounded-full" />
+            </div>
+            {{else}}
+            <div class="flex items-center gap-2">
+                <a href="/login" class="text-blue-600 hover:text-blue-700 font-medium">Sign In</a>
+                <a href="/signup" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium">
+                    Sign Up
+                </a>
+            </div>
+            {{end}}
+        </div>
     </div>
-
-    {{if .LogedIn}}
-    <span class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8 border ml-auto">
-        <img class="aspect-square h-full w-full" alt="@shadcn" src="./assets/placeholder-user.jpeg" />
-    </span>
-    {{else}}
-    <div class="ml-auto ">
-
-        <a href="/login" class="border-2 border-blue-800 px-3 py-2 text-blue-800 rounded-md mx-1"> Sign in </a>
-        <a href="/signup" class="bg-blue-800 px-3 py-2 rounded-md text-white mx-1 hover:bg-blue-900"> Sign up </a>
-    </div>
-    {{end}}
-
-
 </header>
-
 {{end}}

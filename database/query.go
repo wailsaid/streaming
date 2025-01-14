@@ -55,3 +55,9 @@ func FindAllUsers() ([]models.User, error) {
 	err := DB.Find(&users).Error
 	return users, err
 }
+
+func GetRecommendedVideos(currentVideoID string, limit int) []models.Video {
+	var videos []models.Video
+	DB.Where("id != ?", currentVideoID).Limit(limit).Find(&videos)
+	return videos
+}
