@@ -120,7 +120,14 @@ func WatchVideo(c *gin.Context) {
 		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Video not found"})
 		return
 	}
-	c.HTML(http.StatusOK, "watch.html", gin.H{"video": video})
+
+	// Get recommended videos (excluding current video)
+	recommendations := database.GetRecommendedVideos(v, 10) // Get 10 recommendations
+
+	c.HTML(http.StatusOK, "watch.html", gin.H{
+		"video":           video,
+		"recommendations": recommendations,
+	})
 }
 
 func StreamVideo(c *gin.Context) {

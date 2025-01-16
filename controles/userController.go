@@ -127,3 +127,15 @@ func Login(c *gin.Context) {
 	)
 	c.Redirect(302, "/")
 }
+
+func LoginPage(c *gin.Context) {
+	c.HTML(200, "login.html", gin.H{
+		"title": "Login",
+	})
+}
+
+func SignupPage(c *gin.Context) {
+	c.HTML(200, "signup.html", gin.H{
+		"title": "Sign Up",
+	})
+}

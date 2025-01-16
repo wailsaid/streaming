@@ -30,15 +30,15 @@ func main() {
 	server.GET("/watch", controles.WatchVideo)
 	server.GET("/stream", controles.StreamVideo)
 
-	server.GET("signup", func(c *gin.Context) {
-		c.HTML(200, "signup.html", nil)
-	})
+	//server.GET("/login", controles.LoginPage)
+	//server.GET("/signup", controles.SignupPage)
+
+	server.POST("/login", controles.Login)
 	server.POST("/signup", controles.SignUp)
 
-	server.GET("/login", func(c *gin.Context) {
+server.GET("/login", func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
-	server.POST("/login", controles.Login)
 
 	server.GET("/upload", controles.UploadPage)
 	server.POST("/upload", controles.UploadVideo)

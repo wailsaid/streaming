@@ -20,9 +20,9 @@
                     <div class="lg:col-span-2">
                         <div class="bg-black rounded-lg overflow-hidden shadow-lg">
                             <video id="player" playsinline controls>
-                                <source src="/stream?v={{.video.VideoPath}}" type="video/mp4">
-                                Your browser does not support the video tag.
-                            </video>
+                        <source src="/stream?v={{.video.VideoPath}}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
                         </div>
                         
                         <!-- Video Info -->
@@ -52,12 +52,27 @@
                     <!-- Recommendations Section -->
                     <div class="space-y-4">
                         <h2 class="font-semibold text-lg mb-4">Recommended Videos</h2>
-                        <!-- Add recommended videos here -->
-                        <div class="bg-white p-4 rounded-lg shadow hover:bg-gray-50 transition-colors">
-                            <div class="aspect-video bg-gray-200 rounded-lg mb-2"></div>
-                            <h3 class="font-medium line-clamp-2">Recommended Video Title</h3>
-                            <p class="text-sm text-gray-500">Channel Name • 100K views</p>
-                        </div>
+                        {{range .recommendations}}
+                        <a href="/watch?v={{.ID}}" class="block bg-white rounded-lg shadow hover:bg-gray-50 transition-colors">
+                            <div class="flex gap-3 p-3">
+                                <div class="flex-shrink-0 w-40">
+                                    <div class="aspect-video rounded-lg overflow-hidden">
+                                        <img src="/thumbnail?v={{.ThumbnailPath}}" alt="{{.Title}}" 
+                                            class="w-full h-full object-cover" />
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3 class="font-medium line-clamp-2 mb-1">{{.Title}}</h3>
+                                    <p class="text-sm text-gray-600">Channel Name</p>
+                                    <div class="text-sm text-gray-600">
+                                        <span>123K views</span>
+                                        <span class="mx-1">•</span>
+                                        <span>2 days ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {{end}}
                     </div>
                 </div>
             </main>
