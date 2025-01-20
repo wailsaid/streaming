@@ -31,12 +31,12 @@ func main() {
 	server.GET("/stream", controles.StreamVideo)
 
 	//server.GET("/login", controles.LoginPage)
-	//server.GET("/signup", controles.SignupPage)
+	server.GET("/signup", controles.SignupPage)
 
 	server.POST("/login", controles.Login)
 	server.POST("/signup", controles.SignUp)
 
-server.GET("/login", func(c *gin.Context) {
+	server.GET("/login", func(c *gin.Context) {
 		c.HTML(200, "login.html", nil)
 	})
 

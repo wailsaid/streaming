@@ -27,7 +27,7 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
   
-  app:
+  yapp:
     build: .
     container_name: go-app
     environment:
