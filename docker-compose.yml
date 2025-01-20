@@ -27,9 +27,9 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
   
-  yapp:
+  app:
     build: .
-    container_name: go-app
+    container_name: youClone
     environment:
       - DB_HOST=db
       - DB_PORT=3306
