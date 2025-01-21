@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/database"
@@ -42,7 +44,7 @@ func main() {
 	server.GET("/thumbnail", controles.ServeThumbnail)
 
 	if err := utils.InitMinioClient(); err != nil {
-		//log.Fatalf("Failed to initialize MinIO client: %v", err)
+		log.Fatalf("Failed to initialize MinIO client: %v", err)
 	}
 
 	server.Run()
