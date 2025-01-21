@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Sign UP</title>
+    <style>
+        input:user-invalid,
+        textarea:user-invalid {
+            border: 1px solid red;
+        }
+    </style>
 </head>
 
 <body>
@@ -21,7 +27,7 @@
     </form>
  -->
 
-    <div class="flex justify-center items-center h-screen bg-gray-100  text-black">
+    <div class="flex justify-center items-center min-h-[calc(100vh-4rem)]  text-black">
         <div class="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
             <h1 class="text-3xl font-bold mb-6 text-center">Sign up</h1>
             <form class="space-y-4" method="post" action="/signup">
@@ -33,14 +39,14 @@
                         class="bg-gray-200 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-800" />
                 </div>
                 <div>
-                    <label for="email" class="block mb-1 font-medium">
+                    <label for="email" class="block mb-1 text-gray-700 font-medium">
                         Email <span class="text-red-500">*</span>
                     </label>
                     <input type="email" id="email" placeholder="Enter your email" required name="email"
                         class="bg-gray-200 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-800" />
                 </div>
                 <div>
-                    <label for="password" class="block mb-1 font-medium">
+                    <label for="password" class="block mb-1 text-gray-700 font-medium">
                         Password <span class="text-red-500">*</span>
                     </label>
                     <input type="password" id="password" placeholder="Enter your password" required name="password"

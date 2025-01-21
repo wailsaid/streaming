@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/database"
@@ -30,28 +28,21 @@ func main() {
 	server.GET("/watch", controles.WatchVideo)
 	server.GET("/stream", controles.StreamVideo)
 
-	//server.GET("/login", controles.LoginPage)
+	server.GET("/login", controles.LoginPage)
 	server.GET("/signup", controles.SignupPage)
 
 	server.POST("/login", controles.Login)
 	server.POST("/signup", controles.SignUp)
 
-	server.GET("/login", func(c *gin.Context) {
-		c.HTML(200, "login.html", nil)
-	})
-
 	server.GET("/upload", controles.UploadPage)
 	server.POST("/upload", controles.UploadVideo)
 
 	server.GET("/video-list", controles.ListVideos)
-	//server.GET("/list_users", controles.ListUsers)
-
-	server.POST("/remove-adult-content/:id", controles.RemoveAdultContent)
 
 	server.GET("/thumbnail", controles.ServeThumbnail)
 
 	if err := utils.InitMinioClient(); err != nil {
-		log.Fatalf("Failed to initialize MinIO client: %v", err)
+		//log.Fatalf("Failed to initialize MinIO client: %v", err)
 	}
 
 	server.Run()
