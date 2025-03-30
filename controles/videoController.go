@@ -8,14 +8,16 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/minio/minio-go/v7"
 	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/models"
 	"github.com/saidwail/streaming/utils"
 )
 
-func UploadPage(c *gin.Context) {
+// Map is a shorthand for map[string]interface{}
+type Map map[string]interface{}
+
+func UploadPage(c *CustomContext) {
 	var msg string
 	switch status := c.Query("s"); status {
 	case "ok":
@@ -23,7 +25,7 @@ func UploadPage(c *gin.Context) {
 	case "err":
 		msg = "could not upload the video"
 	}
-	c.HTML(200, "upload.html", gin.H{
+	c.HTML(200, "upload", Map{
 		"msg": msg,
 	})
 }
@@ -53,31 +55,31 @@ func uploadFileToMinio(file *multipart.FileHeader, bucket string) (string, error
 	return objectName, nil
 }
 
-func UploadVideo(c *gin.Context) {
+func UploadVideo(c *CustomContext) {
 	title := c.PostForm("title")
 	description := c.PostForm("description")
 	videoFile, err := c.FormFile("video")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not get video file"})
+		c.JSON(http.StatusBadRequest, Map{"error": "Could not get video file"})
 		return
 	}
 
 	thumbnail, err := c.FormFile("thumbnail")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Could not get thumbnail file"})
+		c.JSON(http.StatusBadRequest, Map{"error": "Could not get thumbnail file"})
 		return
 	}
 
 	// Upload files to MinIO
 	videoPath, err := uploadFileToMinio(videoFile, "videos")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload video file"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Could not upload video file"})
 		return
 	}
 
 	thumbnailPath, err := uploadFileToMinio(thumbnail, "thumbnails")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not upload thumbnail file"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Could not upload thumbnail file"})
 		return
 	}
 
@@ -97,7 +99,7 @@ func UploadVideo(c *gin.Context) {
 	c.Redirect(302, "/upload?s=ok")
 }
 
-func ListVideos(c *gin.Context) {
+func ListVideos(c *CustomContext) {
 	list := database.GetAllVideos()
 
 	c.JSON(http.StatusOK, list)
@@ -105,39 +107,41 @@ func ListVideos(c *gin.Context) {
 
 // New methods to add:
 
-func HomePage(c *gin.Context) {
+func HomePage(c *CustomContext) {
 	videos := database.GetAllVideos()
 
-	c.HTML(200, "index.html", gin.H{
+	c.HTML(200, "index", Map{
 		"videos": videos,
+		"title":  "home",
 	})
 }
 
-func WatchVideo(c *gin.Context) {
+func WatchVideo(c *CustomContext) {
 	v := c.Query("v")
 	video, err := database.FindVideoByID(v)
 	if err != nil {
-		c.HTML(http.StatusNotFound, "error.html", gin.H{"error": "Video not found"})
+		c.HTML(http.StatusNotFound, "error", Map{"error": "Video not found"})
 		return
 	}
 
 	// Get recommended videos (excluding current video)
 	recommendations := database.GetRecommendedVideos(v, 10) // Get 10 recommendations
 
-	c.HTML(http.StatusOK, "watch.html", gin.H{
+	c.HTML(http.StatusOK, "watch", Map{
 		"video":           video,
 		"recommendations": recommendations,
+		"hideSide":        true,
 	})
 }
 
-func StreamVideo(c *gin.Context) {
+func StreamVideo(c *CustomContext) {
 	v := c.Query("v")
 	minioClient := utils.GetMinioClient()
 
 	// Get object info to get the size
 	objInfo, err := minioClient.StatObject(context.Background(), "videos", v, minio.StatObjectOptions{})
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Video not found"})
+		c.JSON(http.StatusNotFound, Map{"error": "Video not found"})
 		return
 	}
 
@@ -165,13 +169,13 @@ func StreamVideo(c *gin.Context) {
 	// Get object with range
 	opts := minio.GetObjectOptions{}
 	if err := opts.SetRange(start, end); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid range"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Invalid range"})
 		return
 	}
 
 	object, err := minioClient.GetObject(context.Background(), "videos", v, opts)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve video"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Could not retrieve video"})
 		return
 	}
 	defer object.Close()
@@ -204,32 +208,32 @@ func StreamVideo(c *gin.Context) {
 		}
 		if n > 0 {
 			c.Writer.Write(buffer[:n])
-			c.Writer.Flush()
+			c.Writer.(http.Flusher).Flush()
 		}
 	}
 }
 
-func RemoveAdultContent(c *gin.Context) {
+func RemoveAdultContent(c *CustomContext) {
 	videoID := c.Param("id")
 	timestamps := c.PostFormArray("timestamps")
 
 	// Implement logic to remove adult content at specified timestamps
 	err := utils.RemoveAdultContent(videoID, timestamps)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to remove adult content"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Failed to remove adult content"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Adult content removed successfully"})
+	c.JSON(http.StatusOK, Map{"message": "Adult content removed successfully"})
 }
 
-func ServeThumbnail(c *gin.Context) {
+func ServeThumbnail(c *CustomContext) {
 	v := c.Query("v")
 	minioClient := utils.GetMinioClient()
 
 	object, err := minioClient.GetObject(context.Background(), "thumbnails", v, minio.GetObjectOptions{})
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Thumbnail not found"})
+		c.JSON(http.StatusNotFound, Map{"error": "Thumbnail not found"})
 		return
 	}
 	defer object.Close()
@@ -237,7 +241,7 @@ func ServeThumbnail(c *gin.Context) {
 	// Get content type
 	objInfo, err := minioClient.StatObject(context.Background(), "thumbnails", v, minio.StatObjectOptions{})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not get thumbnail info"})
+		c.JSON(http.StatusInternalServerError, Map{"error": "Could not get thumbnail info"})
 		return
 	}
 

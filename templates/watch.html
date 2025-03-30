@@ -1,0 +1,121 @@
+
+{{define "head"}}
+<title>{{.video.Title}} - YouClone</title>
+<link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
+{{end}}
+    
+{{define "content"}}
+<main class="flex-1 max-w-6xl mx-auto px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Video Section -->
+        <div class="lg:col-span-2">
+            <div class="bg-black rounded-xl overflow-hidden shadow-lg">
+                <video id="player" playsinline controls>
+                    <source src="/stream?v={{.video.VideoPath}}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <!-- Video Info -->
+            <div class="mt-6 bg-white p-6 rounded-xl shadow-md">
+                <h1 class="text-xl font-bold mb-3">{{.video.Title}}</h1>
+                <div class="flex flex-wrap items-center justify-between mb-6 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex shrink-0 overflow-hidden rounded-full w-12 h-12 ring-2 ring-gray-100">
+                            <img class="aspect-square object-cover" alt="Channel Avatar" 
+                                 src="./assets/placeholder-user.jpeg" />
+                            <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 ring-1 ring-white"></span>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Channel Name</h3>
+                            <p class="text-sm text-gray-600">1.2M subscribers</p>
+                        </div>
+                    </div>
+                    <button class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-2.5 rounded-xl font-medium shadow-sm transition-all duration-200">
+                        Subscribe
+                    </button>
+                </div>
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                    <div class="flex items-center justify-between mb-3 text-sm">
+                        <div class="flex items-center gap-2 text-gray-600">
+                            <span>1.2M views</span>
+                            <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                            <span>2 weeks ago</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="flex items-center gap-1.5 text-gray-700 hover:text-blue-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M7 10v12"/>
+                                    <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>
+                                </svg>
+                                <span>12K</span>
+                            </button>
+                            <button class="flex items-center gap-1.5 text-gray-700 hover:text-red-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17 14V2"/>
+                                    <path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>
+                                </svg>
+                                <span>189</span>
+                            </button>
+                            <button class="flex items-center gap-1.5 text-gray-700 hover:text-green-600 transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17 8 12 3 7 8"/>
+                                    <line x1="12" y1="3" x2="12" y2="15"/>
+                                </svg>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-gray-800 whitespace-pre-wrap">{{.video.Description}}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div class="space-y-5">
+            <h2 class="font-semibold text-lg">Recommended Videos</h2>
+            <div class="space-y-4">
+                {{range .recommendations}}
+                <a href="/watch?v={{.ID}}" class="block bg-white rounded-xl shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-200">
+                    <div class="flex gap-3 p-3">
+                        <div class="flex-shrink-0 w-40">
+                            <div class="aspect-video rounded-lg overflow-hidden">
+                                <img src="/thumbnail?v={{.ThumbnailPath}}" alt="{{.Title}}" 
+                                    class="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-medium line-clamp-2 mb-1 hover:text-blue-600 transition-colors duration-200">{{.Title}}</h3>
+                            <p class="text-sm font-medium text-gray-700">Channel Name</p>
+                            <div class="flex items-center text-xs text-gray-500 mt-1 space-x-1">
+                                <span>123K views</span>
+                                <span class="h-1 w-1 rounded-full bg-gray-400"></span>
+                                <span>2 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
+<script>
+    const player = new Plyr('#player', {
+        controls: [
+            'play-large',
+            'play',
+            'progress',
+            'current-time',
+            'duration',
+            'mute',
+            'volume',
+            'settings',
+            'fullscreen'
+        ]
+    });
+</script>
+{{end}}

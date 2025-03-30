@@ -1,24 +1,26 @@
-{{define "layout"}}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>{{.title}} - YouClone</title>
-    {{block "head" .}}{{end}}
+    {{template "head" .}}
 </head>
+
 <body class="bg-gray-100">
     <div class="flex flex-col min-h-dvh">
         {{template "header" .}}
         <div class="flex flex-1">
-            {{template "aside" .}}
+            {{if not .hideSide}}
+                {{template "aside" .}}
+            {{end}}
             <main class="flex-1 p-4 lg:p-6">
-                {{block "content" .}}{{end}}
+                {{template "content" .}}
             </main>
         </div>
     </div>
-    {{block "scripts" .}}{{end}}
+
 </body>
+
 </html>
-{{end}} 

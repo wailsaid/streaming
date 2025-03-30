@@ -1,0 +1,155 @@
+{{define "head"}}
+<title>Upload Video - YouClone</title>
+<style>
+    input:user-invalid,
+    textarea:user-invalid {
+        border: 2px solid rgb(239, 68, 68);
+    }
+</style>
+{{end}}
+
+{{define "content"}}
+<div class="px-6 w-full max-w-2xl mx-auto py-8">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Upload Video</h1>
+        <p class="text-gray-600">Share your video with the world</p>
+    </div>
+
+    <form id="uploadForm" method="post" action="/upload" class="space-y-6" enctype="multipart/form-data">
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <div class="space-y-6">
+                <div>
+                    <label for="title" class="block mb-2 text-sm font-medium text-gray-700">
+                        Title <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" id="title" placeholder="Enter the title of your video" required
+                        name="title"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" />
+                </div>
+
+                <div>
+                    <label for="description" class="block mb-2 text-sm font-medium text-gray-700">
+                        Description <span class="text-red-500">*</span>
+                    </label>
+                    <textarea 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
+                        placeholder="Describe your video..." 
+                        rows="4" 
+                        name="description" 
+                        id="description"
+                        required></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800">Media Files</h2>
+            <div class="space-y-6">
+                <div>
+                    <label for="video" class="block mb-2 text-sm font-medium text-gray-700">
+                        Video File <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Drag and drop your video file here or click to browse</p>
+                        <p class="text-xs text-gray-500">MP4 format only</p>
+                        <input type="file" id="video" required name="video" accept=".mp4"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    </div>
+                    <div id="videoFileName" class="mt-2 text-sm text-gray-600 hidden">
+                        <span class="font-medium">Selected file:</span> <span id="videoName"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="thumbnail" class="block mb-2 text-sm font-medium text-gray-700">
+                        Thumbnail Image <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                        <div class="mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">Drag and drop your thumbnail image here or click to browse</p>
+                        <p class="text-xs text-gray-500">PNG, JPG, JPEG or SVG format</p>
+                        <input type="file" id="thumbnail" required name="thumbnail" accept=".png,.jpg,.jpeg,.svg"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                    </div>
+                    <div id="thumbnailFileName" class="mt-2 text-sm text-gray-600 hidden">
+                        <span class="font-medium">Selected file:</span> <span id="thumbnailName"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="progressContainer" class="hidden bg-white p-6 rounded-2xl shadow-md border border-gray-100">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800">Upload Progress</h2>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-sm text-center mt-2 font-medium">0%</p>
+        </div>
+
+        <button type="submit"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 px-4 rounded-xl font-medium shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
+            Upload Video
+        </button>
+    </form>
+</div>
+
+<script>
+    // Display file name when selected
+    document.getElementById('video').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || '';
+        if (fileName) {
+            document.getElementById('videoName').textContent = fileName;
+            document.getElementById('videoFileName').classList.remove('hidden');
+        } else {
+            document.getElementById('videoFileName').classList.add('hidden');
+        }
+    });
+    
+    document.getElementById('thumbnail').addEventListener('change', function(e) {
+        const fileName = e.target.files[0]?.name || '';
+        if (fileName) {
+            document.getElementById('thumbnailName').textContent = fileName;
+            document.getElementById('thumbnailFileName').classList.remove('hidden');
+        } else {
+            document.getElementById('thumbnailFileName').classList.add('hidden');
+        }
+    });
+
+    // Submit handler to show progress
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const videoInput = document.getElementById('video');
+        const thumbnailInput = document.getElementById('thumbnail');
+
+        if (titleInput.value && descriptionInput.value && videoInput.files.length && thumbnailInput.files.length) {
+            // Show progress container
+            document.getElementById('progressContainer').classList.remove('hidden');
+            
+            // Simulate progress (in a real app, this would be updated based on actual upload progress)
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            const interval = setInterval(function() {
+                progress += 5;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                }
+            }, 300);
+        }
+    });
+</script>
+{{end}}

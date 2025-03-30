@@ -2,8 +2,8 @@ package main
 
 import (
 	"log"
+	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/saidwail/streaming/controles"
 	"github.com/saidwail/streaming/database"
 	"github.com/saidwail/streaming/env"
@@ -13,39 +13,86 @@ import (
 func main() {
 	env.Init()
 	database.Init()
-
 	database.Connect()
 
-	server := gin.Default()
+	// Initialize templates
+	//templates := template.Must(template.ParseGlob("templ/*.html"))
 
-	server.ForwardedByClientIP = true
-	server.SetTrustedProxies([]string{"127.0.0.1"})
+	// Create a new HTTP server mux
+	mux := http.NewServeMux()
 
-	server.Static("./assets", "./templ/assets/**/*")
+	// Serve static files
+	fileServer := http.FileServer(http.Dir("./templ/assets"))
+	mux.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
-	server.LoadHTMLGlob("templ/*.html")
-	server.MaxMultipartMemory = 100 << 20
+	// Set up HTTP handlers (converting from Gin to standard library)
+	mux.HandleFunc("/", adaptHandler(controles.HomePage))
 
-	server.GET("/", controles.HomePage)
-	server.GET("/watch", controles.WatchVideo)
-	server.GET("/stream", controles.StreamVideo)
+	mux.HandleFunc("/watch", adaptHandler(controles.WatchVideo))
+	mux.HandleFunc("/stream", adaptHandler(controles.StreamVideo))
 
-	server.GET("/login", controles.LoginPage)
-	server.GET("/signup", controles.SignupPage)
+	mux.HandleFunc("/login", methodRouter(
+		adaptHandler(controles.LoginPage),
+		adaptPostHandler(controles.Login)))
 
-	server.POST("/login", controles.Login)
-	server.POST("/signup", controles.SignUp)
+	mux.HandleFunc("/signup", methodRouter(
+		adaptHandler(controles.SignupPage),
+		adaptPostHandler(controles.SignUp)))
 
-	server.GET("/upload", controles.UploadPage)
-	server.POST("/upload", controles.UploadVideo)
+	mux.HandleFunc("/upload", methodRouter(
+		adaptHandler(controles.UploadPage),
+		adaptPostHandler(controles.UploadVideo)))
 
-	server.GET("/video-list", controles.ListVideos)
+	mux.HandleFunc("/video-list", adaptHandler(controles.ListVideos))
 
-	server.GET("/thumbnail", controles.ServeThumbnail)
+	mux.HandleFunc("/thumbnail", adaptHandler(controles.ServeThumbnail))
 
+	// Initialize MinIO client
 	if err := utils.InitMinioClient(); err != nil {
 		log.Fatalf("Failed to initialize MinIO client: %v", err)
 	}
 
-	server.Run()
+	// Start the server
+	log.Println("Server starting on http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
+}
+
+// methodRouter routes requests based on HTTP method
+func methodRouter(getHandler, postHandler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			getHandler(w, r)
+		case http.MethodPost:
+			postHandler(w, r)
+		default:
+			w.WriteHeader(http.StatusMethodNotAllowed)
+		}
+	}
+}
+
+// adaptHandler converts controllers to standard http handlers
+func adaptHandler(controller func(*controles.CustomContext)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Create a custom context
+		ctx := controles.NewCustomContext(w, r)
+		controller(ctx)
+	}
+}
+
+// adaptPostHandler for POST requests
+func adaptPostHandler(controller func(*controles.CustomContext)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse the form data first
+		if err := r.ParseMultipartForm(100 << 20); err != nil {
+			if err := r.ParseForm(); err != nil {
+				http.Error(w, "Failed to parse form", http.StatusBadRequest)
+				return
+			}
+		}
+
+		// Create a custom context
+		ctx := controles.NewCustomContext(w, r)
+		controller(ctx)
+	}
 }
