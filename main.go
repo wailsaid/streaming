@@ -22,7 +22,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Serve static files
-	fileServer := http.FileServer(http.Dir("./templ/assets"))
+	fileServer := http.FileServer(http.Dir("./templates/assets"))
 	mux.Handle("/assets/", http.StripPrefix("/assets/", fileServer))
 
 	// Set up HTTP handlers (converting from Gin to standard library)
