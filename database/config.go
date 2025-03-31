@@ -71,6 +71,13 @@ func Connect() {
 		log.Fatal("DB: could not create a video table")
 	}
 	log.Printf("video table done")
+
+	err = DB.AutoMigrate(&models.Comment{})
+	if err != nil {
+		log.Fatal("DB: could not create a comment table")
+	}
+	log.Printf("comment table done")
+
 	fmt.Println("DB: Done ok")
 }
 

@@ -61,3 +61,41 @@ func GetRecommendedVideos(currentVideoID string, limit int) []models.Video {
 	DB.Where("id != ?", currentVideoID).Limit(limit).Find(&videos)
 	return videos
 }
+
+// GetPaginatedVideos returns videos with pagination
+func GetPaginatedVideos(offset, limit int) []models.Video {
+	var videos []models.Video
+	DB.Offset(offset).Limit(limit).Find(&videos)
+	return videos
+}
+
+// SearchVideos searches videos by title or description
+func SearchVideos(query string) []models.Video {
+	var videos []models.Video
+	searchQuery := "%" + query + "%"
+	DB.Where("title LIKE ? OR description LIKE ?", searchQuery, searchQuery).Find(&videos)
+	return videos
+}
+
+// CreateComment adds a new comment
+func CreateComment(comment *models.Comment) error {
+	return DB.Create(comment).Error
+}
+
+// GetCommentsByVideoID retrieves comments for a video
+func GetCommentsByVideoID(videoID uint, limit int) []models.Comment {
+	var comments []models.Comment
+	DB.Where("video_id = ?", videoID).
+		Preload("User").
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&comments)
+	return comments
+}
+
+// FindUserByID retrieves a user by ID
+func FindUserByID(id uint) (models.User, error) {
+	var user models.User
+	err := DB.First(&user, id).Error
+	return user, err
+}

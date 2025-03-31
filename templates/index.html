@@ -4,11 +4,39 @@
 
 {{define "content"}}
 <div class="max-w-[2400px] mx-auto">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" >
         {{range .videos}}
         {{template "vlink" .}}
         {{end}}
-    </div>
+    </div>  
 </div>
+
+<style>
+    .htmx-indicator {
+        display: none;
+    }
+    .htmx-request .htmx-indicator {
+        display: flex;
+    }
+    .htmx-request.htmx-indicator {
+        display: flex;
+    }
+</style>
+
+<script>
+/*     // Setup the observer after the new content is loaded
+    document.addEventListener('htmx:afterSwap', function(event) {
+        // If we're on the index page and loaded more videos
+        if (event.detail.target.id === 'video-grid') {
+            // Add another intersect trigger for infinite scrolling
+            const scrollTrigger = document.querySelector('[hx-trigger="intersect once"]');
+            if (scrollTrigger) {
+                scrollTrigger.setAttribute('hx-get', 
+                    `/api/load-more-videos?offset=${document.querySelectorAll('#video-grid > div').length}&limit=8`);
+                scrollTrigger.setAttribute('hx-trigger', 'intersect once');
+            }
+        }
+    }); */
+</script>
 {{end}}
 

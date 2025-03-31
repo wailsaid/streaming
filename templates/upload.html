@@ -1,21 +1,18 @@
 {{define "head"}}
 <title>Upload Video - YouClone</title>
-<style>
-    input:user-invalid,
-    textarea:user-invalid {
-        border: 2px solid rgb(239, 68, 68);
-    }
-</style>
 {{end}}
 
 {{define "content"}}
-<div class="w-full mx-auto py-8">
+<div class="w-full mx-auto">
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Upload Video</h1>
+        <h1 class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Upload Video</h1>
         <p class="text-gray-600">Share your video with the world</p>
+
     </div>
 
-    <form id="uploadForm" method="post" action="/upload" class="grid  grid-cols-1 lg:grid-cols-2 items-start gap-4" enctype="multipart/form-data">
+    <form id="uploadForm" method="post" action="/upload" class="grid  grid-cols-1 lg:grid-cols-2 items-start gap-4"
+        enctype="multipart/form-data">
 
         <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
             <div class="space-y-6">
@@ -23,8 +20,7 @@
                     <label for="title" class="block mb-2 text-sm font-medium text-gray-700">
                         Title <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" id="title" placeholder="Enter the title of your video" required
-                        name="title"
+                    <input type="text" id="title" placeholder="Enter the title of your video" required name="title"
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" />
                 </div>
 
@@ -32,12 +28,9 @@
                     <label for="description" class="block mb-2 text-sm font-medium text-gray-700">
                         Description <span class="text-red-500">*</span>
                     </label>
-                    <textarea 
-                        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" 
-                        placeholder="Describe your video..." 
-                        rows="4" 
-                        name="description" 
-                        id="description"
+                    <textarea
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        placeholder="Describe your video..." rows="4" name="description" id="description"
                         required></textarea>
                 </div>
                 <div>
@@ -51,7 +44,7 @@
                             <span class="text-gray-700">Private</span>
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="radio" name="visibility" value="public" 
+                            <input type="radio" name="visibility" value="public"
                                 class="form-radio text-blue-600 focus:ring-blue-500" />
                             <span class="text-gray-700">Public</span>
                         </label>
@@ -62,15 +55,14 @@
                     <label for="schedule_public" class="block mb-2 text-sm font-medium text-gray-700">
                         Schedule Public Release (optional)
                     </label>
-                    <input type="date" id="schedule_public" name="schedule_public" 
-                        min="{{.minDate}}"
+                    <input type="date" id="schedule_public" name="schedule_public" min="{{.minDate}}"
                         class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" />
                 </div>
 
                 <script>
                     document.querySelectorAll('input[name="visibility"]').forEach(radio => {
                         radio.addEventListener('change', () => {
-                            document.getElementById('scheduleSection').style.display = 
+                            document.getElementById('scheduleSection').style.display =
                                 radio.value === 'public' ? 'block' : 'none';
                         });
                     });
@@ -78,17 +70,21 @@
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100 sticky top-3" >
+        <div class="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
             <h2 class="text-lg font-semibold mb-4 text-gray-800">Media Files</h2>
             <div class="space-y-6">
                 <div>
                     <label for="video" class="block mb-2 text-sm font-medium text-gray-700">
                         Video File <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                    <div
+                        class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                         <div class="mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                                </path>
                             </svg>
                         </div>
                         <p class="text-sm text-gray-600 mb-2">Drag and drop your video file here or click to browse</p>
@@ -105,13 +101,18 @@
                     <label for="thumbnail" class="block mb-2 text-sm font-medium text-gray-700">
                         Thumbnail Image <span class="text-red-500">*</span>
                     </label>
-                    <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                    <div
+                        class="relative border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
                         <div class="mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
                             </svg>
                         </div>
-                        <p class="text-sm text-gray-600 mb-2">Drag and drop your thumbnail image here or click to browse</p>
+                        <p class="text-sm text-gray-600 mb-2">Drag and drop your thumbnail image here or click to browse
+                        </p>
                         <p class="text-xs text-gray-500">PNG, JPG, JPEG or SVG format</p>
                         <input type="file" id="thumbnail" required name="thumbnail" accept=".png,.jpg,.jpeg,.svg"
                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
@@ -126,7 +127,9 @@
         <div id="progressContainer" class="hidden bg-white p-6 col-span-2 rounded-2xl shadow-md border border-gray-100">
             <h2 class="text-lg font-semibold mb-4 text-gray-800">Upload Progress</h2>
             <div class="w-full bg-gray-200 rounded-full h-3">
-                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+                <div id="progressBar"
+                    class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all duration-300"
+                    style="width: 0%"></div>
             </div>
             <p id="progressText" class="text-sm text-center mt-2 font-medium">0%</p>
         </div>
@@ -140,7 +143,7 @@
 
 <script>
     // Display file name when selected
-    document.getElementById('video').addEventListener('change', function(e) {
+    document.getElementById('video').addEventListener('change', function (e) {
         const fileName = e.target.files[0]?.name || '';
         if (fileName) {
             document.getElementById('videoName').textContent = fileName;
@@ -149,8 +152,8 @@
             document.getElementById('videoFileName').classList.add('hidden');
         }
     });
-    
-    document.getElementById('thumbnail').addEventListener('change', function(e) {
+
+    document.getElementById('thumbnail').addEventListener('change', function (e) {
         const fileName = e.target.files[0]?.name || '';
         if (fileName) {
             document.getElementById('thumbnailName').textContent = fileName;
@@ -161,7 +164,7 @@
     });
 
     // Submit handler to show progress
-    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
         const titleInput = document.getElementById('title');
         const descriptionInput = document.getElementById('description');
         const videoInput = document.getElementById('video');
@@ -170,17 +173,17 @@
         if (titleInput.value && descriptionInput.value && videoInput.files.length && thumbnailInput.files.length) {
             // Show progress container
             document.getElementById('progressContainer').classList.remove('hidden');
-            
+
             // Simulate progress (in a real app, this would be updated based on actual upload progress)
             let progress = 0;
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
-            
-            const interval = setInterval(function() {
+
+            const interval = setInterval(function () {
                 progress += 5;
                 progressBar.style.width = progress + '%';
                 progressText.textContent = progress + '%';
-                
+
                 if (progress >= 100) {
                     clearInterval(interval);
                 }

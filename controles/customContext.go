@@ -57,6 +57,29 @@ func (c *CustomContext) HTML(code int, name string, data interface{}) {
 	}
 }
 
+// PartialHTML renders just the content of a template, not the full layout
+// This is useful for HTMX partial page updates
+func (c *CustomContext) PartialHTML(code int, name string, templateName string, data interface{}) {
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.WriteHeader(code)
+
+	tmplFiles := []string{
+		"templates/components/vlink.html", // Include common components
+		"templates/" + name + ".html",
+	}
+
+	t, err := template.ParseFiles(tmplFiles...)
+	if err != nil {
+		http.Error(c.Writer, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = t.ExecuteTemplate(c.Writer, templateName, data)
+	if err != nil {
+		http.Error(c.Writer, "Error executing template: "+err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // JSON responds with JSON
 func (c *CustomContext) JSON(code int, obj interface{}) {
 	c.Writer.Header().Set("Content-Type", "application/json")

@@ -7,6 +7,8 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"strconv"
+	"text/template"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/saidwail/streaming/database"
@@ -18,6 +20,19 @@ import (
 type Map map[string]interface{}
 
 func UploadPage(c *CustomContext) {
+	if c.GetHeader("HX-Request") == "true" {
+		// For HTMX requests, only render the content portion
+		c.PartialHTML(http.StatusOK, "upload", "content", Map{
+			"title": "upload",
+		})
+
+		// Update the browser title via HTMX
+		c.Writer.Header().Add("HX-Push-Url", "/")
+		c.Writer.Header().Add("HX-Trigger", `{"updateTitle": "Uploade - YouClone"}`)
+
+		return
+	}
+
 	var msg string
 	switch status := c.Query("s"); status {
 	case "ok":
@@ -110,6 +125,20 @@ func ListVideos(c *CustomContext) {
 func HomePage(c *CustomContext) {
 	videos := database.GetAllVideos()
 
+	// Check if this is an HTMX request
+	if c.GetHeader("HX-Request") == "true" {
+		// For HTMX requests, only render the content portion
+		c.PartialHTML(http.StatusOK, "index", "content", Map{
+			"videos": videos,
+			"title":  "home",
+		})
+
+		// Update the browser title via HTMX
+		c.Header("HX-Push-Url", "/")
+		c.Header("HX-Trigger", `{"updateTitle": "Home - YouClone"}`)
+		return
+	}
+
 	c.HTML(200, "index", Map{
 		"videos": videos,
 		"title":  "home",
@@ -127,9 +156,30 @@ func WatchVideo(c *CustomContext) {
 	// Get recommended videos (excluding current video)
 	recommendations := database.GetRecommendedVideos(v, 10) // Get 10 recommendations
 
+	// Get video comments
+	comments := database.GetCommentsByVideoID(video.ID, 5) // Get 5 latest comments
+
+	// Check if this is an HTMX request
+	if c.GetHeader("HX-Request") == "true" {
+		// For HTMX requests, only render the content portion
+		c.PartialHTML(http.StatusOK, "watch", "content", Map{
+			"video":           video,
+			"recommendations": recommendations,
+			"comments":        comments,
+			"hideSide":        true,
+		})
+
+		// Update the browser title via HTMX
+		c.Header("HX-Push-Url", "/watch?v="+v)
+		c.Header("HX-Trigger", fmt.Sprintf(`{"updateTitle": "%s - YouClone"}`, video.Title))
+		return
+	}
+
+	// For regular requests, render the full page
 	c.HTML(http.StatusOK, "watch", Map{
 		"video":           video,
 		"recommendations": recommendations,
+		"comments":        comments,
 		"hideSide":        true,
 	})
 }
@@ -225,6 +275,115 @@ func RemoveAdultContent(c *CustomContext) {
 	}
 
 	c.JSON(http.StatusOK, Map{"message": "Adult content removed successfully"})
+}
+
+// LoadMoreVideos handles HTMX requests to load more videos
+func LoadMoreVideos(c *CustomContext) {
+	offset, err := strconv.Atoi(c.Query("offset"))
+	if err != nil {
+		offset = 0
+	}
+
+	limit, err := strconv.Atoi(c.Query("limit"))
+	if err != nil {
+		limit = 8 // Default limit
+	}
+
+	// Get videos with pagination
+	videos := database.GetPaginatedVideos(offset, limit)
+
+	// Instead of rendering a full HTML page, render only the video links component
+	tmplFiles := []string{
+		"templates/components/vlink.html",
+	}
+
+	t, err := template.ParseFiles(tmplFiles...)
+	if err != nil {
+		http.Error(c.Writer, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	for _, video := range videos {
+		err = t.ExecuteTemplate(c.Writer, "vlink", video)
+		if err != nil {
+			http.Error(c.Writer, "Error executing template: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// SearchVideos handles HTMX requests to search videos
+func SearchVideos(c *CustomContext) {
+	query := c.Query("q")
+	if query == "" {
+		// If no query provided, return all videos
+		videos := database.GetAllVideos()
+		renderVideoResults(c, videos)
+		return
+	}
+
+	// Search videos by title or description
+	videos := database.SearchVideos(query)
+	renderVideoResults(c, videos)
+}
+
+// Helper function to render video search results
+func renderVideoResults(c *CustomContext, videos []models.Video) {
+	tmplFiles := []string{
+		"templates/components/vlink.html",
+	}
+
+	t, err := template.ParseFiles(tmplFiles...)
+	if err != nil {
+		http.Error(c.Writer, "Error parsing template: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.WriteHeader(http.StatusOK)
+
+	if len(videos) == 0 {
+		c.Writer.Write([]byte("<div class='col-span-full text-center py-8'>No videos found matching your search.</div>"))
+		return
+	}
+
+	for _, video := range videos {
+		err = t.ExecuteTemplate(c.Writer, "vlink", video)
+		if err != nil {
+			http.Error(c.Writer, "Error executing template: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// VideoPreview provides a GIF or video snippet preview when hovering
+func VideoPreview(c *CustomContext) {
+	v := c.Query("v")
+	if v == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	// In a real implementation, this would generate or serve an animated preview
+	// For now, we'll just provide a simple HTML overlay with a play button
+
+	html := `
+	<div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+		<div class="animate-pulse flex flex-col items-center">
+			<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" 
+				stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white mb-2">
+				<polygon points="5 3 19 12 5 21 5 3"/>
+			</svg>
+			<span class="text-white text-sm font-medium">Watch Now</span>
+		</div>
+	</div>
+	`
+
+	c.Writer.Header().Set("Content-Type", "text/html")
+	c.Writer.Write([]byte(html))
 }
 
 func ServeThumbnail(c *CustomContext) {

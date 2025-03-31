@@ -5,23 +5,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/htmx.org@1.9.10"
+        integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+        crossorigin="anonymous"></script>
+    <!-- Add HTMX extensions for page transitions -->
+
     <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+    <style>
+        /* Add page transition animations */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.3s ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .htmx-indicator {
+            display: none;
+        }
+
+        .htmx-request .htmx-indicator {
+            display: flex;
+        }
+
+        .htmx-request.htmx-indicator {
+            display: flex;
+        }
+
+        /* Progress bar for page transitions */
+        .transition-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(to right, #3b82f6, #6366f1);
+            transition: width 0.3s ease-out;
+            z-index: 9999;
+        }
+
+        .transition-progress.htmx-request {
+            width: 90%;
+        }
+
+        .transition-progress.htmx-request.htmx-indicator {
+            width: 100%;
+        }
+    </style>
     {{template "head" .}}
 </head>
 
-<body class="bg-gray-100">
-    <div class="flex flex-col min-h-dvh">
+<body class="bg-gray-100" hx-ext="head-support, preload">
+    <!-- Progress bar indicator for page transitions -->
+    <div class="transition-progress htmx-indicator"></div>
+
+    <div class="flex flex-col min-h-dvh" id="page-container">
         {{template "header" .}}
         <div class="flex flex-1">
             {{if not .hideSide}}
-                {{template "aside" .}}
+            {{template "aside" .}}
             {{end}}
-            <main class="flex-1 p-4 lg:p-6">
+            <main class="flex-1 p-4 lg:p-6 fade-in overflow-y-scroll rounded" id="content-container">
                 {{template "content" .}}
             </main>
         </div>
     </div>
 
+    <script>
+        // Script to handle page transitions and form resets
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // Handle page transitions
+            document.body.addEventListener('htmx:afterSwap', function (event) {
+                
+                if (event.detail.target.id === 'content-container') {
+                    // Add the fade-in class to trigger animation
+                    event.detail.target.classList.add('fade-in');
+                }
+            });
+
+            // Listen for the resetForm event from the server
+            document.body.addEventListener('resetForm', function (event) {
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => form.reset());
+            });
+
+            document.body.addEventListener("htmx:trigger", function (evt) {
+                console.log(evt.detail.elt.innerText)
+                document.title = evt.detail.elt.innerText; // Set new page title
+            });
+
+            // Preload links for faster transitions
+            /*  htmx.onLoad(function(content) {
+                 const links = content.querySelectorAll('a[href]:not([hx-boost])');
+                 links.forEach(link => {
+                     if (!link.hasAttribute('hx-get') && link.hostname === window.location.hostname) {
+                         link.setAttribute('hx-get', link.getAttribute('href'));
+                         link.setAttribute('hx-push-url', 'true');
+                         link.setAttribute('hx-target', '#content-container');
+                         link.setAttribute('hx-indicator', '.transition-progress');
+                         link.setAttribute('hx-swap', 'innerHTML transition:true');
+                         link.removeAttribute('href');
+                     }
+                 });
+             }); */
+        });
+    </script>
 </body>
 
 </html>

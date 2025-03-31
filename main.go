@@ -47,6 +47,16 @@ func main() {
 
 	mux.HandleFunc("/thumbnail", adaptHandler(controles.ServeThumbnail))
 
+	// HTMX endpoints
+	//mux.HandleFunc("/api/load-more-videos", adaptHandler(controles.LoadMoreVideos))
+	mux.HandleFunc("/api/search-videos", adaptHandler(controles.SearchVideos))
+	mux.HandleFunc("/api/comments", methodRouter(
+		adaptHandler(controles.GetVideoComments),
+		adaptPostHandler(controles.AddComment)))
+	//mux.HandleFunc("/api/video-preview", adaptHandler(controles.VideoPreview))
+	//mux.HandleFunc("/api/like-video", adaptPostHandler(controles.LikeVideo))
+	//mux.HandleFunc("/api/dislike-video", adaptPostHandler(controles.DislikeVideo))
+
 	// Initialize MinIO client
 	if err := utils.InitMinioClient(); err != nil {
 		log.Fatalf("Failed to initialize MinIO client: %v", err)

@@ -23,10 +23,19 @@
 
         <!-- Search bar -->
         <div class="flex-1 px-4 lg:px-8">
-            <form class="max-w-2xl mx-auto">
+            <div class="max-w-2xl mx-auto">
                 <div class="relative">
-                    <input type="search" placeholder="Search videos..." 
-                        class="w-full h-10 pl-4 pr-12 rounded-full border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200" />
+                    <input type="search" 
+                           name="q" 
+                           placeholder="Search videos..." 
+                           class="w-full h-10 pl-4 pr-12 rounded-full border border-gray-300 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                           hx-get="/api/search-videos"
+                           hx-trigger="keyup changed delay:500ms, search"
+                           hx-target="#video-grid"
+                           hx-indicator="#search-indicator" />
+                    <div id="search-indicator" class="htmx-indicator absolute right-12 top-1/2 -translate-y-1/2">
+                        <div class="animate-spin h-5 w-5 border-2 border-blue-500 rounded-full border-t-transparent"></div>
+                    </div>
                     <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 rounded-full transition-colors duration-200">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" 
                             stroke="currentColor" stroke-width="2">
@@ -35,7 +44,7 @@
                         </svg>
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
 
         <!-- Right side -->
