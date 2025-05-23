@@ -1,0 +1,36 @@
+{
+  "name": "webui",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "rollup-plugin-visualizer": "^5.14.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.2",
+    "@vue/tsconfig": "^0.7.0",
+    "@vueuse/core": "^13.2.0",
+    "autoprefixer": "^10.4.17",
+    "axios": "^1.9.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-vue-next": "^0.511.0",
+    "postcss": "^8.4.35",
+    "reka-ui": "^2.2.1",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1",
+    "vue-tsc": "^2.2.8"
+  }
+}
