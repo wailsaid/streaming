@@ -8,7 +8,11 @@ import { RouterLink } from 'vue-router';
 const videos = ref([])
 
 onMounted(() => {
-    axios.get("/search")
+    axios.get("/search").then(res=>{
+        videos.value = res.data
+    }).catch(err=>{
+        console.error("Error fetching videos:", err)
+    })
 
 });
 
@@ -20,6 +24,8 @@ const link = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBw8PDw8
     <div class="home">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
             <VideoCard :video="null"/>
+
+            <VideoCard v-for="v in videos" :video="null"/>
 
         </div>
 

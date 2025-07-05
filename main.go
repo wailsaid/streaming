@@ -33,7 +33,6 @@ func main() {
 			log.Fatal(err)
 		}
 		videos := make([]map[string]interface{}, 0)
-		log.Print(len(dir))
 		for _, file := range dir {
 			video := map[string]interface{}{}
 			v, _ := file.Info()
