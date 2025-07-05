@@ -15,9 +15,6 @@ func main() {
 	database.Init()
 	database.Connect() */
 
-	// Initialize templates
-	//templates := template.Must(template.ParseGlob("templ/*.html"))
-
 	// Create a new HTTP server mux
 	server := http.NewServeMux()
 
@@ -41,6 +38,7 @@ func main() {
 			video := map[string]interface{}{}
 			v, _ := file.Info()
 			video["title"] = v.Name()
+			video["path"] = "tmp/videos/" + v.Name()
 			videos = append(videos, video)
 		}
 

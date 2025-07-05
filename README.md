@@ -5,7 +5,6 @@ This project is a simple Video streaming System built with the [Go](https://gola
 ## Technologies Used
 
 - [Go](https://golang.org/) - The primary programming language
-- [Gin Web Framework](https://github.com/gin-gonic/gin) - A lightweight web framework for building APIs
 - [GORM](https://gorm.io/) - An ORM library for Go, used for database operations
 - [Plyr](https://plyr.io/) - A simple, accessible and customisable media player for Video
 - [MinIO](https://min.io/) - High-performance object storage for video and thumbnail storage
@@ -41,12 +40,7 @@ This project is a simple Video streaming System built with the [Go](https://gola
    - DB_USER=root
    - DB_PASSWORD=rootpassword
    - DB_NAME=mydb
-   - GIN_MODE=release
-   - MINIO_ENDPOINT=minio:9000
-   - MINIO_ACCESS_KEY=minioadmin
-   - MINIO_SECRET_KEY=minioadmin
-   - MINIO_USE_SSL=false
-
+   
 ## Running with Docker
 
 1. **Build and start the containers**:

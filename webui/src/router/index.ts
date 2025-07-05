@@ -20,7 +20,11 @@ const router = createRouter({
       name: 'upload',
       component: () => import('../views/upload.vue'),
     },
-
+{
+      path: '/watch/:videoId',
+      name: 'watch',
+      component: () => import('../views/watch.vue'),
+    },
 
     {
       path: '/profile/history',
