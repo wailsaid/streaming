@@ -2,7 +2,11 @@
 
 import Button from "@/components/ui/button/Button.vue";
 import Calendar from "@/components/ui/calendar/Calendar.vue";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Card from "@/components/ui/card/Card.vue";
+import CardContent from "@/components/ui/card/CardContent.vue";
+import CardDescription from "@/components/ui/card/CardDescription.vue";
+import CardHeader from "@/components/ui/card/CardHeader.vue";
+import CardTitle from "@/components/ui/card/CardTitle.vue";
 import CardFooter from "@/components/ui/card/CardFooter.vue";
 import Checkbox from "@/components/ui/checkbox/Checkbox.vue";
 import Input from "@/components/ui/input/Input.vue";
@@ -26,30 +30,36 @@ import TabsTrigger from "@/components/ui/tabs/TabsTrigger.vue";
 import Textarea from "@/components/ui/textarea/Textarea.vue";
 import axios from "axios";
 import { CalendarIcon, Crop, Languages, Palette, RotateCcw, Sliders, Sparkles, Upload, Wand2 } from "lucide-vue-next";
-import { Label } from "reka-ui";
+import Label from "@/components/ui/label/Label.vue";
 import { ref } from "vue";
 
 const chunck_size = 5 << 20;
 
 const upload = async (e) => {
+  console.log(e);
+
   const file = e.target[0].files[0]
   const chunks_count = Math.ceil(file.size / chunck_size)
   for (let i = 0; i < chunks_count; i++) {
     let start = i * chunck_size;
     let end = Math.min(start + chunck_size, file.size);
-    
-    const chunck = file.slice(start,end)
+
+    const chunck = file.slice(start, end)
     const formData = new FormData();
 
     formData.append("file", chunck);
     formData.append("file_name", file.name);
-    formData.append("index", ''+i);
-    formData.append("total", chunks_count+'');
+    formData.append("index", '' + i);
+    formData.append("total", chunks_count + '');
 
-    
+
     try {
       const response = await axios.post("/upload", formData);
-      console.log(response.data);
+      if (response.status === 201) {
+        console.log(response.data?.message);
+        return;
+      }
+      uploadProgress.value = i / chunks_count * 100
     } catch (error) {
       console.error(error);
       return
@@ -57,58 +67,72 @@ const upload = async (e) => {
   }
 };
 
+const getNewVideo = (filename: string, id: string) => {
+
+}
+
 const isDragging = ref(false);
 const file = ref<File | null>(null);
 const uploading = ref(false);
 const uploadProgress = ref(0);
 
-  const handleDragOver = (e) => {
-    e.preventDefault()
-    isDragging.value = true
-  }
+const handleDragOver = (e) => {
+  e.preventDefault()
+  isDragging.value = true
+}
 const handleDragLeave = () => {
-    isDragging.value = false
-  }
+  isDragging.value = false
+}
 
-  const handleDrop = (e) => {
-    e.preventDefault()
-    isDragging.value=false
+const handleDrop = (e) => {
+  e.preventDefault()
+  isDragging.value = false
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0]
-      if (droppedFile.type.startsWith("video/")) {
-        file.value = droppedFile
-        //generateThumbnail(droppedFile)
-      } else {
-        alert("Please upload a video file")
-      }
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    const droppedFile = e.dataTransfer.files[0]
+    if (droppedFile.type.startsWith("video/")) {
+      file.value = droppedFile
+      //generateThumbnail(droppedFile)
+    } else {
+      alert("Please upload a video file")
     }
   }
+}
 
-    const handleFileChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const selectedFile = e.target.files[0]
-      file.value = selectedFile
-      console.log(file.value.name);
-      
-      //generateThumbnail(selectedFile)
-    }
+const handleFileChange = (e) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const selectedFile = e.target.files[0]
+    file.value = selectedFile
+    console.log(file.value.name);
+
+    //generateThumbnail(selectedFile)
   }
+}
 </script>
 <template>
-
+  
+  
+  <!--
+    <div>
+      <form @submit.prevent="upload">
+      <input type="file" v-on:change="handleFileChange" required accept="video/*" />
+      <button type="submit" class="mx-5 px-3 rounded-md bg-slate-200">upload</button>
+    </form>
+    <div v-if="uploadProgress">
+      {{ uploadProgress+" %"}}
+    </div>
+  </div> -->
 <div class="container mx-auto py-6">
-      <h1 class="text-3xl font-bold mb-6">Upload Video</h1>
-
+  <h1 class="text-3xl font-bold mb-6">Upload Video</h1>
       
-        <Card v-if="!file" class="w-full max-w-3xl mx-auto">
+        <Card v-if="!file" class="w-full max-w-3xl mx-auto ">
           <CardHeader>
             <CardTitle>Upload Video</CardTitle>
             <CardDescription>Drag and drop a video file to upload</CardDescription>
           </CardHeader>
           <CardContent>
             <div
-              class="border-2 border-dashed rounded-lg p-12 text-center "
+              class="border-2 border-dashed rounded-lg p-12 text-center hover:cursor-pointer"
                 :class="isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/20'"
               v-on:dragover="handleDragOver"
               v-on:dragleave="handleDragLeave"
@@ -981,6 +1005,7 @@ const handleDragLeave = () => {
         </div>
       
     </div>
+
 </template>
 
 <style scoped></style>

@@ -5,13 +5,23 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
 
-	http.Handle("/", http.FileServer(http.Dir("./dist")))
+	http.Handle("/assets/", http.FileServer(http.Dir("./dist")))
 
 	http.HandleFunc("POST /upload", uploadHander)
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Fallback to index.html for all frontend routes
+		http.ServeFile(w, r, "./dist/index.html")
+	})
 	log.Println("starting server...")
 	log.Fatalln(http.ListenAndServe(":8080", nil))
 }
