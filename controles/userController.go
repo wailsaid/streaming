@@ -13,130 +13,122 @@ import (
 	"github.com/saidwail/streaming/models"
 )
 
+// SignUp registers a new user
+// POST /api/auth/register
+// Body JSON: { "username": "", "email": "", "password": "" }
 func SignUp(c *CustomContext) {
-	log.Println(c.Params)
+	var body struct {
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
 
-	var user models.User
-	if c.Bind(&user) != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "faild to read body",
-		})
+	if err := c.Bind(&body); err != nil || body.Email == "" || body.Password == "" {
+		c.JSON(http.StatusBadRequest, Map{"error": "invalid request body"})
 		return
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), 10)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "faild to hash password",
-		})
-		return
-	}
-	user.Password = string(hash)
-
-	err = database.CreateUser(&user)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "could not store user",
-		})
+		c.JSON(http.StatusInternalServerError, Map{"error": "could not hash password"})
 		return
 	}
 
-	c.Redirect(302, "/login")
+	user := &models.User{
+		Username: body.Username,
+		Email:    body.Email,
+		Password: string(hash),
+	}
+
+	if err := database.CreateUser(user); err != nil {
+		c.JSON(http.StatusBadRequest, Map{"error": "email already in use or could not create user"})
+		return
+	}
+
+	log.Printf("new user registered: %s", user.Email)
+	c.JSON(http.StatusCreated, Map{"message": "registered successfully"})
 }
 
-func ListUsers(c *CustomContext) {
-	ListUsers, err := database.FindAllUsers()
-	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "could not retrieve users",
-		})
-		return
-	}
-	c.JSON(http.StatusOK, ListUsers)
-}
-
+// Login authenticates a user and returns a JWT token as JSON
+// POST /api/auth/login
+// Body JSON: { "email": "", "password": "" }
 func Login(c *CustomContext) {
-	var reqBody struct {
-		Email    string `form:"email"`
-		Password string `form:"password"`
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
-	if c.Bind(&reqBody) != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "could not read request body",
-		})
+	if err := c.Bind(&body); err != nil || body.Email == "" || body.Password == "" {
+		c.JSON(http.StatusBadRequest, Map{"error": "invalid request body"})
 		return
 	}
 
-	user, err := database.FindUserByEmail(reqBody.Email)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "incorrect email or password",
-		})
+	user, err := database.FindUserByEmail(body.Email)
+	if err != nil || user.ID == 0 {
+		c.JSON(http.StatusUnauthorized, Map{"error": "incorrect email or password"})
 		return
 	}
 
-	// c.JSON()
-
-	res := database.DB.First(&user, "email = ?", reqBody.Email)
-
-	if res.Error != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "incorrect email or password ",
-		})
-		return
-	}
-	if user.ID == 0 {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "incorrect email or password",
-		})
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(body.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, Map{"error": "incorrect email or password"})
 		return
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(reqBody.Password))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "incorrect email or password",
-		})
-		return
-	}
-	// c.JSON(200, gin.H{})
+	// Generate JWT — 72 hour expiry
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": user.Email,
-		"exp": time.Now().Add(time.Minute * 1).Unix(),
+		"uid": user.ID,
+		"exp": time.Now().Add(time.Hour * 72).Unix(),
 	})
 
-	stringToken, err := token.SignedString([]byte(os.Getenv("TOKEN_SECRET")))
+	secret := os.Getenv("TOKEN_SECRET")
+	if secret == "" {
+		secret = "dev_secret_change_me"
+	}
+
+	stringToken, err := token.SignedString([]byte(secret))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, Map{
-			"error": "faild to generate token " + err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, Map{"error": "could not generate token"})
 		return
 	}
 
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie(
-		"Authorization",
-		stringToken,
-		int(time.Now().Add(time.Minute*1).Unix()),
-		"",
-		"",
-		true,
-		true,
-	)
-	c.Redirect(302, "/")
-}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     "auth_token",
+		Value:    stringToken,
+		Path:     "/",
+		HttpOnly: true, // Prevents JavaScript access (Security!)
+		Secure:   true, // Only sends over HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   72 * 3600, // 72 hours
+	})
 
-func LoginPage(c *CustomContext) {
-	log.Println("login.html")
-	c.HTML(200, "login", Map{
-		"title": "Login",
+	c.JSON(http.StatusOK, Map{
+		"token": stringToken,
+		"user": Map{
+			"id":       user.ID,
+			"username": user.Username,
+			"email":    user.Email,
+		},
 	})
 }
 
-func SignupPage(c *CustomContext) {
-	log.Println("signup.html")
-	c.HTML(200, "signup", Map{
-		"title": "Sign Up",
-	})
+// ListUsers returns all users (admin use)
+func ListUsers(c *CustomContext) {
+	users, err := database.FindAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Map{"error": "could not retrieve users"})
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }
+
+// Me returns the currently authenticated user from context
+func Me(c *CustomContext) {
+	// User is attached to context by JwtFilter
+	// For now return a simple response — can be expanded
+	c.JSON(http.StatusOK, Map{"message": "authenticated"})
+}
+
+// legacy HTML page funcs — kept as stubs so nothing breaks if referenced
+func LoginPage(c *CustomContext)  { c.JSON(http.StatusOK, Map{"message": "use Vue login page"}) }
+func SignupPage(c *CustomContext) { c.JSON(http.StatusOK, Map{"message": "use Vue register page"}) }

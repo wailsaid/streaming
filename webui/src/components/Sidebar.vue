@@ -43,7 +43,7 @@ const exploreLinks = [
 </script>
 <template>
         <aside class="hidden md:block w-60 fixed top-14 left-0 bottom-0 border-r bg-background z-30">
-            <ScrollArea className="h-full py-4">
+            <ScrollArea class="h-full py-4">
                 <div class="px-3 space-y-4">
                     
                   
